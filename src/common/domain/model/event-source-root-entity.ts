@@ -28,17 +28,17 @@ export abstract class EventSourceRootEntity extends AssertionConcern {
     streamVersion: number,
   ) {
     super();
-    for (var event of eventStream) {
+    for (const event of eventStream) {
       this.mutateWhen(event);
     }
     this.setUnmutatedVersion(streamVersion);
   }
 
   protected mutateWhen(event: DomainEvent): void {
-    var rootType = this.constructor.name;
-    var eventType = event.constructor.name;
-    var key: string = rootType + ':' + eventType;
-    var mutatorMethod: Function = EventSourceRootEntity.mutatorMethods.get(key);
+    const rootType = this.constructor.name;
+    const eventType = event.constructor.name;
+    const key: string = rootType + ':' + eventType;
+    let mutatorMethod: Function = EventSourceRootEntity.mutatorMethods.get(key);
 
     if (mutatorMethod === null) {
       mutatorMethod = this.cacheMutatorMethodFor(key, rootType, eventType);
@@ -51,7 +51,7 @@ export abstract class EventSourceRootEntity extends AssertionConcern {
     eventType: string,
   ): Function {
     try {
-      var method: Function = this.hiddenOrPublicMethod(rootType, eventType);
+      const method: Function = this.hiddenOrPublicMethod(rootType, eventType);
       // method.setAccessible(true);
       EventSourceRootEntity.mutatorMethods.set(key, method);
       return method;
@@ -70,7 +70,7 @@ export abstract class EventSourceRootEntity extends AssertionConcern {
   }
 
   private hiddenOrPublicMethod(rootType: string, eventType: string): Function {
-    var method: Function = null;
+    const method: Function = null;
     try {
       // method = rootType;
     } catch (e) {

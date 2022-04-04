@@ -4,6 +4,11 @@ import { Identity } from './identity';
 export class AbstractId extends AssertionConcern implements Identity {
   private _id: string;
 
+  constructor(id: string) {
+    super();
+    this.setId(id);
+  }
+
   public id() {
     return this._id;
   }
@@ -12,11 +17,11 @@ export class AbstractId extends AssertionConcern implements Identity {
   protected hashPrimeValue: () => number;
   protected validateId(id: string): void {}
 
-  // TODO: change __id setter name
-  private set __id(id: string) {
+  private setId(id: string) {
     this.assertArgumentNotEmpty(id, 'The basic identity is required');
     this.assertArgumentLength(
       id,
+      0,
       36,
       'The basic identity must be 36 characters',
     );
