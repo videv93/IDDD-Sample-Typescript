@@ -20,7 +20,7 @@ export class EventSerializer extends AbstractSerializer {
   }
 
   deserialize<T extends DomainEvent>(serialization: string): T {
-    var domainEvent: T = Object.setPrototypeOf(
+    const domainEvent: T = Object.setPrototypeOf(
       JSON.parse(serialization),
       DomainEvent.prototype,
     );

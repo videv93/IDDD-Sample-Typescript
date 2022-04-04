@@ -4,19 +4,28 @@ export class AssertionConcern {
   protected constructor() {
     // super();
   }
-  protected assertAgumentEquals(obj1: Object, obj2: Object, msg: string): void {
+  protected assertArgumentEquals(
+    obj1: Object,
+    obj2: Object,
+    msg: string,
+  ): void {
     if (!(obj1 === obj2)) {
       throw new IllegalArgumentException(msg);
     }
   }
-  protected assertAgumentFalse(b: boolean, msg: string): void {
+  protected assertArgumentFalse(b: boolean, msg: string): void {
     if (b) {
       throw new IllegalArgumentException(msg);
     }
   }
-  protected assertArgumentLength(s: string, max: number, msg: string): void {
+  protected assertArgumentLength(
+    s: string,
+    min: number,
+    max: number,
+    msg: string,
+  ): void {
     const length = s.trim().length;
-    if (length > max) {
+    if (length < min || length > max) {
       throw new IllegalArgumentException(msg);
     }
   }

@@ -1,7 +1,8 @@
 import { DomainEventSubscriber } from './domain-event-subscriber';
 
 export class DomainEventPublisher {
-  private static readonly _instance: DomainEventPublisher = new DomainEventPublisher();
+  private static readonly _instance: DomainEventPublisher =
+    new DomainEventPublisher();
 
   private _publishing: boolean;
 
@@ -15,10 +16,10 @@ export class DomainEventPublisher {
     if (!this.isPublishing() && this.hasSubscriber()) {
       try {
         this.setPublishing(true);
-        var eventType = event.constructor.name;
-        var allSubscribers: DomainEventSubscriber<T>[] = this.subscribers();
+        const eventType = event.constructor.name;
+        const allSubscribers: DomainEventSubscriber<T>[] = this.subscribers();
         allSubscribers.forEach((subscriber) => {
-          var subscribedToType = subscriber.subscribedToEventType();
+          const subscribedToType = subscriber.subscribedToEventType();
           // || subscribedToType === DomainEvent.constructor.name
           if (eventType === subscribedToType) {
             subscriber.handleEvent(event);

@@ -25,7 +25,7 @@ export class StoredEvent extends AssertionConcern {
   }
 
   toDomainEvent<T extends DomainEvent>() {
-    var domainEventClass: T = null;
+    let domainEventClass: T = null;
     try {
       domainEventClass = this.typeName();
     } catch (e) {
@@ -33,7 +33,7 @@ export class StoredEvent extends AssertionConcern {
         'Class load error, because: ' + (e as Error).message,
       );
     }
-    var domainEvent: T = EventSerializer.instance().deserialize(
+    const domainEvent: T = EventSerializer.instance().deserialize(
       this.eventBody,
       domainEventClass,
     );
