@@ -1,18 +1,38 @@
 import { ConcurrencySafeEntity } from 'src/common/domain/model/concurrency-safe-entity';
 import { TenantId } from './tenant-id';
+import { GroupMember } from './group-member';
+import UUID from 'uuid';
+import { IllegalArgumentException } from 'src/common/illegal-argument.exception';
+
+const ROLE_GROUP_PREFIX = 'ROLE-INTERNAL-GROUP';
 
 export class Group extends ConcurrencySafeEntity {
-  public static ROLE_GROUP_PREFIX = 'ROLE-INTERNAL-GROUP';
-  private description: string;
-  private groupMembers: Set<GroupMember>;
-  private name: string;
-  private tenantId: TenantId;
+  private _description: string;
+  private _groupMembers: Set<GroupMember>;
+  private _name: string;
+  private _tenantId: TenantId;
 
   constructor(tenantId: TenantId, name: string, description: string) {
     super();
     this.setDescription(description);
     this.setName(name);
     this.setTenantId(tenantId);
+  }
+
+  description() {
+    return this._description;
+  }
+
+  groupMembers() {
+    return this._groupMembers;
+  }
+
+  name() {
+    return this._name;
+  }
+
+  tenantId() {
+    return this._tenantId;
   }
 
   protected setDescription(description: string) {
@@ -24,8 +44,38 @@ export class Group extends ConcurrencySafeEntity {
       'Group description must be 250 characters or less',
     );
 
-    this.description = description;
+    this._description = description;
   }
 
-  protected setName(name: string): void {}
+  protected isInternalGroup(name: string) {
+    return name.startsWith(ROLE_GROUP_PREFIX);
+  }
+
+  protected setName(name: string): void {
+    this.assertArgumentNotEmpty(name, 'Group name is required');
+    this.assertArgumentLength(
+      name,
+      1,
+      100,
+      'Group name must be 100 characters or less.',
+    );
+
+    if (this.isInternalGroup(name)) {
+      let uuid = name.substring(ROLE_GROUP_PREFIX.length);
+      try {
+        UUID.parse(uuid);
+      } catch (error) {
+        throw new IllegalArgumentException(
+          'The group name has an invalid format.',
+        );
+      }
+    }
+
+    this._name = name;
+  }
+
+  protected setTenantId(tenantId: TenantId): void {
+    this.assertArgumentNotNull(tenantId, 'The tenantId must be provided.');
+    this._tenantId = tenantId;
+  }
 }
