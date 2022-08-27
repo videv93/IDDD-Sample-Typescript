@@ -29,6 +29,10 @@ export class AbstractId extends AssertionConcern implements Identity {
     this._id = id;
   }
 
+  equals(other: AbstractId) {
+    return other !== null && this.id() === other.id();
+  }
+
   public toString() {
     return this.constructor.name + ' [id=' + this._id + ']';
   }

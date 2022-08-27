@@ -3,6 +3,8 @@ import { TenantId } from './tenant-id';
 import { GroupMember } from './group-member';
 import UUID from 'uuid';
 import { IllegalArgumentException } from 'src/common/illegal-argument.exception';
+import { User } from './user';
+import { GroupMemberService } from './group-member.service';
 
 const ROLE_GROUP_PREFIX = 'ROLE-INTERNAL-GROUP';
 
@@ -45,6 +47,25 @@ export class Group extends ConcurrencySafeEntity {
     );
 
     this._description = description;
+  }
+
+  isMember(user: User, groupMemberService: GroupMemberService) {
+    this.assertArgumentNotNull(user, 'User must not be null');
+    this.assertArgumentEquals(
+      this.tenantId(),
+      user.tenantId(),
+      'Wrong tenant for this group',
+    );
+    this.assertArgumentTrue(user.isEnabled(), 'User is not enabled.');
+
+    let isMember = this.groupMembers().has(user.toGroupMember());
+    if (isMember) {
+      isMember = groupMemberService.confirmUser(this, user);
+    } else {
+      isMember = groupMemberService.isUserInNestedGroup(this, user);
+    }
+
+    return isMember;
   }
 
   protected isInternalGroup(name: string) {

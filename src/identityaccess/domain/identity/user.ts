@@ -6,12 +6,13 @@ import { TenantId } from './tenant-id';
 import { Enablement } from './enablement';
 import { ConcurrencySafeEntity } from 'src/common/domain/model/concurrency-safe-entity';
 import { DomainEventPublisher } from 'src/common/domain/model/domain-event-publisher';
+import { DomainRegistry } from '../domain-registry';
 
 export class User extends ConcurrencySafeEntity {
-  private enablement: Enablement;
+  private _enablement: Enablement;
   private _password: string;
   private _person: Person;
-  private _tenantKId: TenantId;
+  private _tenantId: TenantId;
   private _username: string;
 
   changePassword(currentPassword: string, changedPassword: string): void {
@@ -39,10 +40,29 @@ export class User extends ConcurrencySafeEntity {
     this.person().changeName(personalName);
   }
 
+  protected assertPasswordsNotSame(
+    currentPassword: string,
+    changedPassword: string,
+  ) {
+    this.assertArgumentNotEquals(
+      currentPassword,
+      changedPassword,
+      'The password is unchanged',
+    );
+  }
+
+  protected assertPasswordNotWeak(plainTextPassword: string) {
+    this.assertArgumentFalse(
+      DomainRegistry.passwordService().isWeak(plainTextPassword),
+      'The password must be stronger.',
+    );
+  }
+
   protected protectPassword(
     currentPassword: string,
     changedPassword: string,
   ): void {
+    this.assertPasswordsNotSame(currentPassword, changedPassword);
     this.setPassword(this.asEncryptedValue(changedPassword));
   }
 
@@ -62,7 +82,7 @@ export class User extends ConcurrencySafeEntity {
   }
 
   tenantId() {
-    return this._tenantKId;
+    return this._tenantId;
   }
 
   username() {
