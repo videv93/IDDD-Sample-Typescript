@@ -24,6 +24,19 @@ export class GroupMemberService {
     return this._userRepository;
   }
 
+  confirmUser(group: Group, user: User): boolean {
+    let userConfirmed = true;
+    let confirmedUser = this.userRepository().userWithUsername(
+      group.tenantId(),
+      user.username(),
+    );
+
+    if (confirmedUser == null || !confirmedUser.isEnabled()) {
+      userConfirmed = false;
+    }
+    return userConfirmed;
+  }
+
   isMemberGroup(group: Group, memberGroup: GroupMember): boolean {
     let isMember: boolean = false;
     for (let member of group.groupMembers()) {

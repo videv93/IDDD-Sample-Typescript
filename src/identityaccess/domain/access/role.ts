@@ -3,6 +3,7 @@ import { Group } from '../identity/group';
 import { TenantId } from '../identity/tenant-id';
 import UUID from 'uuid';
 import { User } from '../identity/user';
+import { GroupMemberService } from '../identity/group-member.service';
 
 export class Role extends ConcurrencySafeEntity {
   private _description: string;

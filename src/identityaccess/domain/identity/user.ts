@@ -7,6 +7,8 @@ import { Enablement } from './enablement';
 import { ConcurrencySafeEntity } from 'src/common/domain/model/concurrency-safe-entity';
 import { DomainEventPublisher } from 'src/common/domain/model/domain-event-publisher';
 import { DomainRegistry } from '../domain-registry';
+import { GroupMember } from './group-member';
+import { GroupMemberType } from './group-member-type';
 
 export class User extends ConcurrencySafeEntity {
   private _enablement: Enablement;
@@ -73,6 +75,10 @@ export class User extends ConcurrencySafeEntity {
     return encryptedValue;
   }
 
+  isEnabled() {
+    return this.enablement().isEnablementEnabled();
+  }
+
   person() {
     return this._person;
   }
@@ -89,7 +95,20 @@ export class User extends ConcurrencySafeEntity {
     return this._username;
   }
 
+  enablement() {
+    return this._enablement;
+  }
+
   private setPassword(password: string) {
     this._password = password;
+  }
+
+  toGroupMember(): GroupMember {
+    let groupMember = new GroupMember(
+      this.tenantId(),
+      this.username(),
+      GroupMemberType.USER,
+    );
+    return groupMember;
   }
 }

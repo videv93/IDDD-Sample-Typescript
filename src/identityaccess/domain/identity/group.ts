@@ -6,9 +6,8 @@ import { IllegalArgumentException } from 'src/common/illegal-argument.exception'
 import { User } from './user';
 import { GroupMemberService } from './group-member.service';
 
-const ROLE_GROUP_PREFIX = 'ROLE-INTERNAL-GROUP';
-
 export class Group extends ConcurrencySafeEntity {
+  static ROLE_GROUP_PREFIX = 'ROLE-INTERNAL-GROUP';
   private _description: string;
   private _groupMembers: Set<GroupMember>;
   private _name: string;
@@ -69,7 +68,7 @@ export class Group extends ConcurrencySafeEntity {
   }
 
   protected isInternalGroup(name: string) {
-    return name.startsWith(ROLE_GROUP_PREFIX);
+    return name.startsWith(Group.ROLE_GROUP_PREFIX);
   }
 
   protected setName(name: string): void {
@@ -82,7 +81,7 @@ export class Group extends ConcurrencySafeEntity {
     );
 
     if (this.isInternalGroup(name)) {
-      let uuid = name.substring(ROLE_GROUP_PREFIX.length);
+      let uuid = name.substring(Group.ROLE_GROUP_PREFIX.length);
       try {
         UUID.parse(uuid);
       } catch (error) {
