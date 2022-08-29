@@ -74,10 +74,10 @@ export class Person extends ConcurrencySafeEntity {
   }
 
   protected tenantId(): TenantId {
-    return this.tenantId;
+    return this._tenantId;
   }
 
-  protected setTenantId(tenantId: TenantId): void {
+  setTenantId(tenantId: TenantId): void {
     this.assertArgumentNotNull(tenantId, 'The tenantId is required.');
     this._tenantId = tenantId;
   }

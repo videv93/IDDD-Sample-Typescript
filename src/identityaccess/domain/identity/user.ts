@@ -9,6 +9,7 @@ import { DomainEventPublisher } from 'src/common/domain/model/domain-event-publi
 import { DomainRegistry } from '../domain-registry';
 import { GroupMember } from './group-member';
 import { GroupMemberType } from './group-member-type';
+import { UserRegistered } from './user-registerd';
 
 export class User extends ConcurrencySafeEntity {
   private _enablement: Enablement;
@@ -16,6 +17,59 @@ export class User extends ConcurrencySafeEntity {
   private _person: Person;
   private _tenantId: TenantId;
   private _username: string;
+
+  constructor(
+    tenantId: TenantId,
+    username: string,
+    password: string,
+    enablement: Enablement,
+    person: Person,
+  ) {
+    super();
+    this.setEnablement(enablement);
+    this.setPerson(person);
+    this.setTenantId(tenantId);
+    this.setUsername(username);
+    this.protectPassword('', password);
+    person.internalOnlySetUser(this);
+
+    DomainEventPublisher.instance().publish(
+      new UserRegistered(
+        this.tenantId(),
+        username,
+        person.name(),
+        person.contactInformation().emailAddress(),
+      ),
+    );
+  }
+
+  setEnablement(enablement: Enablement) {
+    this.assertArgumentNotNull(enablement, 'The enablement is required.');
+
+    this._enablement = enablement;
+  }
+
+  setPerson(person: Person) {
+    this.assertArgumentNotNull(person, 'The person is required.');
+    this._person = person;
+  }
+
+  setTenantId(tenantId: TenantId) {
+    this.assertArgumentNotNull(tenantId, 'TenantId is required.');
+
+    this._tenantId = tenantId;
+  }
+
+  setUsername(username: string) {
+    this.assertArgumentNotEmpty(username, 'The username is required.');
+    this.assertArgumentLength(
+      username,
+      3,
+      250,
+      'The username must be 3 to 250 characters.',
+    );
+    this._username = username;
+  }
 
   changePassword(currentPassword: string, changedPassword: string): void {
     this.assertArgumentNotEmpty(
