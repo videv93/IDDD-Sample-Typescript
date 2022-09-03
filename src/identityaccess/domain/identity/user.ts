@@ -10,6 +10,7 @@ import { DomainRegistry } from '../domain-registry';
 import { GroupMember } from './group-member';
 import { GroupMemberType } from './group-member-type';
 import { UserRegistered } from './user-registerd';
+import { UserDescriptor } from './user-descriptor';
 
 export class User extends ConcurrencySafeEntity {
   private _enablement: Enablement;
@@ -155,6 +156,14 @@ export class User extends ConcurrencySafeEntity {
 
   private setPassword(password: string) {
     this._password = password;
+  }
+
+  userDescriptor(): UserDescriptor {
+    return new UserDescriptor(
+      this.tenantId(),
+      this.username(),
+      this.person().emailAddress().address(),
+    );
   }
 
   toGroupMember(): GroupMember {
