@@ -5,6 +5,7 @@ import UUID from 'uuid';
 import { IllegalArgumentException } from 'src/common/illegal-argument.exception';
 import { User } from './user';
 import { GroupMemberService } from './group-member.service';
+import { DomainEventPublisher } from 'src/common/domain/model/domain-event-publisher';
 
 export class Group extends ConcurrencySafeEntity {
   static ROLE_GROUP_PREFIX = 'ROLE-INTERNAL-GROUP';
@@ -18,6 +19,25 @@ export class Group extends ConcurrencySafeEntity {
     this.setDescription(description);
     this.setName(name);
     this.setTenantId(tenantId);
+  }
+
+  addUser(user: User) {
+    this.assertArgumentNotNull(user, 'User must not be null.');
+    this.assertArgumentNotEquals(
+      this.tenantId(),
+      user.tenantId(),
+      'Wrong tenant for this group.',
+    );
+    this.assertArgumentTrue(user.isEnabled(), 'User is not enabled.');
+
+    if (
+      this.groupMembers().add(user.toGroupMember()) &&
+      !this.isInternalGroup()
+    ) {
+      DomainEventPublisher.instance().publish(
+        new GroupUserAdded(this.tenantId(), this.name(), user.username()),
+      );
+    }
   }
 
   description() {
@@ -67,7 +87,7 @@ export class Group extends ConcurrencySafeEntity {
     return isMember;
   }
 
-  protected isInternalGroup(name: string) {
+  protected isInternalGroup(name?: string) {
     return name.startsWith(Group.ROLE_GROUP_PREFIX);
   }
 
