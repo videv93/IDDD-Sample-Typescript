@@ -6,6 +6,11 @@ import { IllegalArgumentException } from 'src/common/illegal-argument.exception'
 import { User } from './user';
 import { GroupMemberService } from './group-member.service';
 import { DomainEventPublisher } from 'src/common/domain/model/domain-event-publisher';
+import { GroupMemberType } from './group-member-type';
+import { GroupGroupAdded } from './group-group-added';
+import { GroupUserAdded } from './group-user-added';
+import { GroupGroupRemoved } from './group-group-removed';
+import { GroupUserRemoved } from './group-user-removed';
 
 export class Group extends ConcurrencySafeEntity {
   static ROLE_GROUP_PREFIX = 'ROLE-INTERNAL-GROUP';
@@ -19,6 +24,28 @@ export class Group extends ConcurrencySafeEntity {
     this.setDescription(description);
     this.setName(name);
     this.setTenantId(tenantId);
+  }
+
+  addGroup(group: Group, groupMemberService: GroupMemberService) {
+    this.assertArgumentNotNull(group, 'Group must not be null.');
+    this.assertArgumentEquals(
+      this.tenantId(),
+      group.tenantId(),
+      'Wrong tenant for this group.',
+    );
+    this.assertArgumentFalse(
+      groupMemberService.isMemberGroup(group, this.toGroupMember()),
+      'Group recursion.',
+    );
+
+    if (
+      this.groupMembers().add(group.toGroupMember()) &&
+      !this.isInternalGroup()
+    ) {
+      DomainEventPublisher.instance().publish(
+        new GroupGroupAdded(this.tenantId(), this.name(), group.name()),
+      );
+    }
   }
 
   addUser(user: User) {
@@ -36,6 +63,42 @@ export class Group extends ConcurrencySafeEntity {
     ) {
       DomainEventPublisher.instance().publish(
         new GroupUserAdded(this.tenantId(), this.name(), user.username()),
+      );
+    }
+  }
+
+  removeGroup(group: Group) {
+    this.assertArgumentNotNull(group, 'Group must not be null.');
+    this.assertArgumentEquals(
+      this.tenantId(),
+      group.tenantId(),
+      'Wrong tenant for this group.',
+    );
+
+    if (
+      this.groupMembers().delete(group.toGroupMember()) &&
+      !this.isInternalGroup()
+    ) {
+      DomainEventPublisher.instance().publish(
+        new GroupGroupRemoved(this.tenantId(), this.name(), group.name()),
+      );
+    }
+  }
+
+  removeUser(user: User) {
+    this.assertArgumentNotNull(user, 'User must not be null.');
+    this.assertArgumentEquals(
+      this.tenantId(),
+      user.tenantId(),
+      'Wrong tenant for this group.',
+    );
+
+    if (
+      this.groupMembers().delete(user.toGroupMember()) &&
+      !this.isInternalGroup()
+    ) {
+      DomainEventPublisher.instance().publish(
+        new GroupUserRemoved(this.tenantId(), this.name(), user.username()),
       );
     }
   }
@@ -117,5 +180,14 @@ export class Group extends ConcurrencySafeEntity {
   protected setTenantId(tenantId: TenantId): void {
     this.assertArgumentNotNull(tenantId, 'The tenantId must be provided.');
     this._tenantId = tenantId;
+  }
+
+  protected toGroupMember(): GroupMember {
+    let groupMember = new GroupMember(
+      this.tenantId(),
+      this.name(),
+      GroupMemberType.GROUP,
+    );
+    return groupMember;
   }
 }
