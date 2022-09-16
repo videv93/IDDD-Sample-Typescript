@@ -1,5 +1,6 @@
 import { ConcurrencySafeEntity } from 'src/common/domain/model/concurrency-safe-entity';
 import { IllegalArgumentException } from 'src/common/illegal-argument.exception';
+import { InvitationDescriptor } from './invitation-descriptor';
 import { TenantId } from './tenant-id';
 
 export class RegistrationInvitation extends ConcurrencySafeEntity {
@@ -23,6 +24,10 @@ export class RegistrationInvitation extends ConcurrencySafeEntity {
 
   startingOn() {
     return this._startingOn;
+  }
+
+  tenantId(): TenantId {
+    return this._tenantId;
   }
 
   isAvailable(): boolean {
@@ -149,5 +154,15 @@ export class RegistrationInvitation extends ConcurrencySafeEntity {
 
   protected setUntil(until: Date) {
     this._until = until;
+  }
+
+  toDescriptor(): InvitationDescriptor {
+    return new InvitationDescriptor(
+      this.tenantId(),
+      this.invitationId(),
+      this.description(),
+      this.startingOn(),
+      this.until(),
+    );
   }
 }

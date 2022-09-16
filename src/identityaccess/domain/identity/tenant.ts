@@ -12,6 +12,7 @@ import { Group } from './group';
 import { GroupProvisioned } from './group-provisioned';
 import { Role } from '../access/role';
 import { RoleProvisioned } from '../access/role-provisioned';
+import { InvitationDescriptor } from './invitation-descriptor';
 
 export class Tenant extends ConcurrencySafeEntity {
   private _active: boolean;
@@ -99,7 +100,7 @@ export class Tenant extends ConcurrencySafeEntity {
       description,
     );
     let added = this.registrationInvitations().add(invitation);
-    this.assertStateTrue(added, 'The invitation should have been added.');
+    // this.assertStateTrue(added, 'The invitation should have been added.');
 
     return invitation;
   }

@@ -4,6 +4,9 @@ import { TenantId } from '../identity/tenant-id';
 import UUID from 'uuid';
 import { User } from '../identity/user';
 import { GroupMemberService } from '../identity/group-member.service';
+import { DomainEventPublisher } from 'src/common/domain/model/domain-event-publisher';
+import { UserAssignedToRole } from './user-assigned-to-role';
+import { GroupAssignedToRole } from './group-assign-to-role';
 
 export class Role extends ConcurrencySafeEntity {
   private _description: string;
@@ -23,7 +26,49 @@ export class Role extends ConcurrencySafeEntity {
     this.setName(name);
     this.setSupportsNesting(supportsNesting);
     this.setTenantId(tenantId);
+
     this.createInternalGroup();
+  }
+
+  assignGroup(group: Group, groupMemberService: GroupMemberService) {
+    this.assertStateTrue(
+      this.supportsNesting(),
+      'This role does not support group nesting.',
+    );
+    this.assertArgumentNotNull(group, 'Group must not be null.');
+    this.assertArgumentNotEquals(
+      this.tenantId(),
+      group.tenantId(),
+      'Wrong tenant for this group.',
+    );
+
+    this.group().addGroup(group, groupMemberService);
+
+    DomainEventPublisher.instance().publish(
+      new GroupAssignedToRole(this.tenantId(), this.name(), group.name()),
+    );
+  }
+
+  assignUser(user: User) {
+    this.assertArgumentNotNull(user, 'User must not be null.');
+    this.assertArgumentEquals(
+      this.tenantId(),
+      user.tenantId(),
+      'Wrong tenant for this user.',
+    );
+
+    this.group().addUser(user);
+
+    DomainEventPublisher.instance().publish(
+      new UserAssignedToRole(
+        this.tenantId(),
+        this.name(),
+        user.username(),
+        user.person().name().firstName(),
+        user.person().name().lastName(),
+        user.person().emailAddress().address(),
+      ),
+    );
   }
 
   tenantId(): TenantId {
