@@ -5,7 +5,7 @@ import { TenantId } from './tenant-id';
 import { TenantRepository } from './tenant.repository';
 import { UserDescriptor } from './user-descriptor';
 
-export class AuthenticateService extends AssertionConcern {
+export class AuthenticationService extends AssertionConcern {
   private _encryptionService: EncryptionService;
   private _tenantRepository: TenantRepository;
   private _userRepository: UserRepository;

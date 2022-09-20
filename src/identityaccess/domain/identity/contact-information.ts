@@ -30,7 +30,7 @@ export class ContactInformation extends AssertionConcern {
     );
   }
 
-  changePostalCode(postalAddress: PostalAddress): ContactInformation {
+  changePostalAddress(postalAddress: PostalAddress): ContactInformation {
     return new ContactInformation(
       this.emailAddress(),
       postalAddress,
