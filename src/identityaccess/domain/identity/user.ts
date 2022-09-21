@@ -11,6 +11,7 @@ import { GroupMember } from './group-member';
 import { GroupMemberType } from './group-member-type';
 import { UserRegistered } from './user-registerd';
 import { UserDescriptor } from './user-descriptor';
+import { UserEnablementChanged } from './user-enablement-changed';
 
 export class User extends ConcurrencySafeEntity {
   private _enablement: Enablement;
@@ -95,6 +96,18 @@ export class User extends ConcurrencySafeEntity {
 
   changePersonalName(personalName: FullName) {
     this.person().changeName(personalName);
+  }
+
+  defineEnablement(enablement: Enablement) {
+    this.setEnablement(enablement);
+
+    DomainEventPublisher.instance().publish(
+      new UserEnablementChanged(
+        this.tenantId(),
+        this.username(),
+        this.enablement(),
+      ),
+    );
   }
 
   protected assertPasswordsNotSame(

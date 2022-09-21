@@ -2,6 +2,7 @@ import { IllegalArgumentException } from 'src/common/illegal-argument.exception'
 import { AuthenticationService } from '../domain/identity/authentication.service';
 import { ContactInformation } from '../domain/identity/contact-information';
 import { EmailAddress } from '../domain/identity/email-address';
+import { Enablement } from '../domain/identity/enablement';
 import { GroupMemberService } from '../domain/identity/group-member.service';
 import { GroupRepository } from '../domain/identity/group.repository';
 import { PostalAddress } from '../domain/identity/postal-address';
@@ -118,6 +119,47 @@ export class IdentityApplicationService {
             command.addressCountryCode,
           ),
         ),
+    );
+  }
+
+  changeUserPrimaryTelephone(command: ChangePrimaryTelephoneCommand) {
+    let user = this.existingUser(command.tenantId, command.username);
+    this.internalChangeUserContactInformation(
+      user,
+      user
+        .person()
+        .contactInformation()
+        .changePrimaryTelephone(new TelePhone(command.telephone)),
+    );
+  }
+
+  changeUserSecondaryTelephone(command: ChangeSecondaryTelephoneCommand) {
+    let user = this.existingUser(command.tenantId, command.username);
+
+    this.internalChangeUserContactInformation(
+      user,
+      user
+        .person()
+        .contactInformation()
+        .changeSecondaryTelephone(new TelePhone(command.telephone)),
+    );
+  }
+
+  changeUserPassword(command: ChangeUserPasswordCommand) {
+    let user = this.existingUser(command.tenantId, command.username);
+
+    user.changePassword(command.currentPassword, command.changedPassword);
+  }
+
+  changeUserPersonalName(command: ChangeUserPersonalNameCommand) {
+    let user = this.existingUser(command.tenantId, command.username);
+  }
+
+  definedUserEnablement(command: DefineUserEnablementCommand) {
+    let user = this.existingUser(command.tenantId, command.username);
+
+    user.defineEnablement(
+      new Enablement(command.isEnabled, command.startDate, command.endDate),
     );
   }
 
