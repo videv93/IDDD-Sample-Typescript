@@ -3,6 +3,7 @@ import { AuthenticationService } from '../domain/identity/authentication.service
 import { ContactInformation } from '../domain/identity/contact-information';
 import { EmailAddress } from '../domain/identity/email-address';
 import { Enablement } from '../domain/identity/enablement';
+import { FullName } from '../domain/identity/full-name';
 import { GroupMemberService } from '../domain/identity/group-member.service';
 import { GroupRepository } from '../domain/identity/group.repository';
 import { PostalAddress } from '../domain/identity/postal-address';
@@ -19,7 +20,12 @@ import { AuthenticateUserCommand } from './command/authenticate-user.command';
 import { ChangeContactInfoCommand } from './command/change-contact-info.command';
 import { ChangeEmailAddressCommand } from './command/change-email-address.command';
 import { ChangePostalAddressCommand } from './command/change-postal-address.command';
+import { ChangePrimaryTelephoneCommand } from './command/change-primary-telephone.command';
+import { ChangeSecondaryTelephoneCommand } from './command/change-secondary-telephone.command';
+import { ChangeUserPasswordCommand } from './command/change-user-password.command';
+import { ChangeUserPersonalNameCommand } from './command/change-user-personal-name.comand';
 import { DeactivateTenantCommand } from './command/deactive-tenant.command';
+import { DefineUserEnablementCommand } from './command/define-user-enablement.command';
 
 export class IdentityApplicationService {
   private _authenticationService: AuthenticationService;
@@ -153,6 +159,8 @@ export class IdentityApplicationService {
 
   changeUserPersonalName(command: ChangeUserPersonalNameCommand) {
     let user = this.existingUser(command.tenantId, command.username);
+
+    user.person().changeName(new FullName(command.firstName, command.lastName));
   }
 
   definedUserEnablement(command: DefineUserEnablementCommand) {
@@ -247,5 +255,9 @@ export class IdentityApplicationService {
 
   authenticationService() {
     return this._authenticationService;
+  }
+
+  TenantProvisioningService() {
+    return this._tenantPrivisioningService;
   }
 }
