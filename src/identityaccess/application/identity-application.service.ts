@@ -4,10 +4,13 @@ import { ContactInformation } from '../domain/identity/contact-information';
 import { EmailAddress } from '../domain/identity/email-address';
 import { Enablement } from '../domain/identity/enablement';
 import { FullName } from '../domain/identity/full-name';
+import { Group } from '../domain/identity/group';
 import { GroupMemberService } from '../domain/identity/group-member.service';
 import { GroupRepository } from '../domain/identity/group.repository';
+import { Person } from '../domain/identity/person';
 import { PostalAddress } from '../domain/identity/postal-address';
 import { TelePhone } from '../domain/identity/telephone';
+import { Tenant } from '../domain/identity/tenant';
 import { TenantId } from '../domain/identity/tenant-id';
 import { TenantProvisioningService } from '../domain/identity/tenant-provising.service';
 import { TenantRepository } from '../domain/identity/tenant.repository';
@@ -26,6 +29,11 @@ import { ChangeUserPasswordCommand } from './command/change-user-password.comman
 import { ChangeUserPersonalNameCommand } from './command/change-user-personal-name.comand';
 import { DeactivateTenantCommand } from './command/deactive-tenant.command';
 import { DefineUserEnablementCommand } from './command/define-user-enablement.command';
+import { ProvisionGroupCommand } from './command/provision-group.command';
+import { ProvisionTenantCommand } from './command/provision-tenant.command';
+import { RegisterUserCommand } from './command/register-user.command';
+import { RemoveGroupFromGroupCommand } from './command/remove-group-from-group.command';
+import { RemoveUserFromGroupCommand } from './command/remove-user-from-group.command';
 
 export class IdentityApplicationService {
   private _authenticationService: AuthenticationService;
@@ -171,6 +179,107 @@ export class IdentityApplicationService {
     );
   }
 
+  group(tenantId: string, groupName: string) {
+    let group = this.groupRepository().groupNamed(
+      new TenantId(tenantId),
+      groupName,
+    );
+    return group;
+  }
+
+  isGroupMember(
+    tenantId: string,
+    groupName: string,
+    username: string,
+  ): boolean {
+    let group = this.existingGroup(tenantId, groupName);
+
+    let user = this.existingUser(tenantId, username);
+    return group.isMember(user, this.groupMemberService());
+  }
+
+  provisionGroup(command: ProvisionGroupCommand): Group {
+    let tenant = this.existingTenant(command.tenantId);
+    let group = tenant.provisionGroup(command.groupName, command.description);
+
+    return group;
+  }
+
+  provisionTenant(command: ProvisionTenantCommand): Tenant {
+    return this.tenantProvisioningService().provisionTenant(
+      command.tenantName,
+      command.tenantDescription,
+      new FullName(command.administorFirstName, command.administorLastName),
+      new EmailAddress(command.emailAddress),
+      new PostalAddress(
+        command.addressStateProvince,
+        command.addressCity,
+        command.addressStateProvince,
+        command.addressPostalCode,
+        command.addressCountryCode,
+      ),
+      new TelePhone(command.primaryTelephone),
+      new TelePhone(command.secondaryTelephone),
+    );
+  }
+
+  registerUser(command: RegisterUserCommand): User {
+    let tenant = this.existingTenant(command.tenantId);
+
+    let user = tenant.registerUser(
+      command.invitationIdentifier,
+      command.username,
+      command.password,
+      new Enablement(command.isEnabled, command.startDate, command.endDate),
+      new Person(
+        new TenantId(command.tenantId),
+        new FullName(command.firstName, command.lastName),
+        new ContactInformation(
+          new EmailAddress(command.emailAddress),
+          new PostalAddress(
+            command.addressStateProvince,
+            command.addressCity,
+            command.addressStateProvince,
+            command.addressPostalCode,
+            command.addressCountryCode,
+          ),
+          new TelePhone(command.primaryTelephone),
+          new TelePhone(command.secondaryTelephone),
+        ),
+      ),
+    );
+
+    if (user == null) {
+      throw new IllegalArgumentException('User not registered.');
+    }
+
+    this.userRepository().add(user);
+
+    return user;
+  }
+
+  removeGroupFromGroup(command: RemoveGroupFromGroupCommand): void {
+    let parentGroup = this.existingGroup(
+      command.tenantId,
+      command.parentGroupName,
+    );
+
+    let childGroup = this.existingGroup(
+      command.tenantId,
+      command.childGroupName,
+    );
+
+    parentGroup.removeGroup(childGroup);
+  }
+
+  removeUserFromGroup(command: RemoveUserFromGroupCommand): void {
+    let group = this.existingGroup(command.tenantId, command.groupName);
+
+    let user = this.existingUser(command.tenantId, command.username);
+
+    group.removeUser(user);
+  }
+
   private internalChangeUserContactInformation(
     user: User,
     contactInformation: ContactInformation,
@@ -229,14 +338,6 @@ export class IdentityApplicationService {
     return tenant;
   }
 
-  group(tenantId: string, groupName: string) {
-    let group = this.groupRepository().groupNamed(
-      new TenantId(tenantId),
-      groupName,
-    );
-    return group;
-  }
-
   tenantRepository() {
     return this._tenantRepository;
   }
@@ -257,7 +358,7 @@ export class IdentityApplicationService {
     return this._authenticationService;
   }
 
-  TenantProvisioningService() {
+  tenantProvisioningService() {
     return this._tenantPrivisioningService;
   }
 }
