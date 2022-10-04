@@ -1,15 +1,15 @@
 import { AbstractId } from 'src/common/domain/model/abstract-id';
 
-export class Tenant extends AbstractId {
+export class TenantId extends AbstractId {
   constructor(id: string) {
     super(id);
   }
 
-  hashOddValue(): number {
+  hashOddValue() {
     return 3517;
   }
 
-  hashPrimeValue(): number {
+  hashPrimeValue() {
     return 7;
   }
 }

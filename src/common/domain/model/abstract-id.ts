@@ -13,8 +13,8 @@ export class AbstractId extends AssertionConcern implements Identity {
     return this._id;
   }
 
-  protected hashOddValue: () => number;
-  protected hashPrimeValue: () => number;
+  protected hashOddValue(): void {}
+  protected hashPrimeValue(): void {}
   protected validateId(id: string): void {}
 
   private setId(id: string) {

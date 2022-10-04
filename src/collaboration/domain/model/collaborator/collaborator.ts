@@ -9,6 +9,11 @@ export class Collaborator {
     this.name = name;
   }
 
+  // TODO: implement abstract function on typescript
+  protected hashPrimeValue(): number {
+    return 0;
+  }
+
   get emailAddress() {
     return this._emailAddress;
   }
