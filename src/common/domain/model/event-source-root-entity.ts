@@ -34,6 +34,11 @@ export abstract class EventSourceRootEntity extends AssertionConcern {
     this.setUnmutatedVersion(streamVersion);
   }
 
+  protected apply(domainEvent: DomainEvent) {
+    this.mutatingEvents().push(domainEvent);
+    this.mutateWhen(domainEvent);
+  }
+
   protected mutateWhen(event: DomainEvent): void {
     const rootType = this.constructor.name;
     const eventType = event.constructor.name;
@@ -58,13 +63,13 @@ export abstract class EventSourceRootEntity extends AssertionConcern {
     } catch (e) {
       throw new IllegalArgumentException(
         'I do not understand ' +
-          EventSourceRootEntity.MUTATOR_METHOD_NAME +
-          '(' +
-          eventType +
-          ') because: ' +
-          e.constructor.name +
-          '>>>' +
-          (e as Error).message,
+        EventSourceRootEntity.MUTATOR_METHOD_NAME +
+        '(' +
+        eventType +
+        ') because: ' +
+        e.constructor.name +
+        '>>>' +
+        (e as Error).message,
       );
     }
   }

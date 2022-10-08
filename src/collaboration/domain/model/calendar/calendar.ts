@@ -7,10 +7,10 @@ import { CalendarSharer } from './calendar-sharer';
 
 export class Calendar extends EventSourceRootEntity {
   private _calendarId: CalendarId;
-  private _desccription: string;
+  private _description: string;
   private _name: string;
   private _owner: Owner;
-  private sharedWith: Set<CalendarSharer>;
+  private _sharedWith: Set<CalendarSharer>;
   private _tenant: Tenant;
 
   constructor(
@@ -45,5 +45,43 @@ export class Calendar extends EventSourceRootEntity {
         sharedWith,
       ),
     );
+  }
+
+  allSharedWith() {
+    return this.sharedWith();
+  }
+
+  calendarId() {
+    return this._calendarId;
+  }
+
+  changeDescription(description: string) {
+    this.assertArgumentNotEmpty(
+      description,
+      'The description must be provided.',
+    );
+    this.apply(new CalendarDescriptionChanged(
+      this.tenant(),
+      this.calendarId(),
+      this.name(),
+      description
+    ),
+    );
+  }
+
+  tenant() {
+    return this._tenant;
+  }
+
+  description() {
+    return this._description;
+  }
+
+  name() {
+    return this._name;
+  }
+
+  sharedWith() {
+    return this._sharedWith;
   }
 }
