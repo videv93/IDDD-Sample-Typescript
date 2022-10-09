@@ -1,8 +1,12 @@
 import { EventSourceRootEntity } from 'src/common/domain/model/event-source-root-entity';
 import { Owner } from '../collaborator/owner';
+import { Participant } from '../collaborator/participant';
 import { Tenant } from '../tenant/tenant';
+import { Alarm } from './alarm';
 import { CalendarCreated } from './calendar-created';
+import { CalendarDescriptionChanged } from './calendar-description-changed';
 import { CalendarId } from './calendar-id';
+import { CalendarRenamed } from './calendar-renamed';
 import { CalendarSharer } from './calendar-sharer';
 
 export class Calendar extends EventSourceRootEntity {
@@ -60,12 +64,13 @@ export class Calendar extends EventSourceRootEntity {
       description,
       'The description must be provided.',
     );
-    this.apply(new CalendarDescriptionChanged(
-      this.tenant(),
-      this.calendarId(),
-      this.name(),
-      description
-    ),
+    this.apply(
+      new CalendarDescriptionChanged(
+        this.tenant(),
+        this.calendarId(),
+        this.name(),
+        description,
+      ),
     );
   }
 
@@ -79,6 +84,47 @@ export class Calendar extends EventSourceRootEntity {
 
   name() {
     return this._name;
+  }
+
+  owner() {
+    return this._owner;
+  }
+
+  rename(name: string): void {
+    this.assertArgumentNotEmpty(name, 'The name must be provided.');
+    this.apply(
+      new CalendarRenamed(
+        this.tenant(),
+        this.calendarId(),
+        name,
+        this.description(),
+      ),
+    );
+  }
+
+  scheduleCalendarEntry(
+    calendarIdentityService: CalendarIdentityService,
+    description: string,
+    location: string,
+    owner: Owner,
+    timeSpan: TimeSpan,
+    repeatition: Repetition,
+    alarm: Alarm,
+    invitees: Set<Participant>,
+  ) {
+    let calendarEntry = new CalendarEntry(
+      this.tenant(),
+      this.calendarId(),
+      calendarIdentityService.nextCalendarEntryId(),
+      description,
+      location,
+      owner,
+      timeSpan,
+      repeatition,
+      alarm,
+      invitees,
+    );
+    return calendarEntry;
   }
 
   sharedWith() {
