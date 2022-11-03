@@ -1,3 +1,5 @@
+import { AssertionConcern } from 'src/common';
+
 export class TimeSpan extends AssertionConcern {
   private _begins: Date;
   private _ends: Date;

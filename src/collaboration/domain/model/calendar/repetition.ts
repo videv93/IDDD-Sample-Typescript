@@ -9,6 +9,11 @@ export class Repetition extends AssertionConcern {
     return new Repetition(RepeatType.DoesNotRepeat, ends);
   }
 
+  static Repetition indefinitelyRepeatsInstance(repeatType: RepeatType) {
+    let ends = new Date(31536000000000);
+    return new Repetition(repeatType, ends);
+  }
+
   constructor(repeats: RepeatType, endsOn: Date) {
     super();
     this.setEnds(endsOn);
