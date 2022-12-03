@@ -9,6 +9,18 @@ export class Collaborator {
     this.name = name;
   }
 
+  equals(obj: Collaborator) {
+    let equals = false;
+    if (obj !== null && obj instanceof Collaborator) {
+      equals =
+        this.emailAddress === obj.emailAddress &&
+        this.identity === obj.identity &&
+        this.name === obj.name;
+    }
+
+    return equals;
+  }
+
   // TODO: implement abstract function on typescript
   protected hashPrimeValue(): number {
     return 0;
