@@ -5,6 +5,7 @@ import { Tenant } from '../tenant/tenant';
 import { Alarm } from './alarm';
 import { CalendarEntryId } from './calendar-entry-id';
 import { CalendarId } from './calendar-id';
+import { isDoesNotRepeat } from './repeat-type';
 import { Repetition } from './repetition';
 import { TimeSpan } from './time-span';
 
@@ -67,5 +68,31 @@ export class CalendarEntry extends EventSourceRootEntity {
         this.apply(new CalendarEntryDescriptionChanged(this.tenant, this.calendarId));
       }
     }
+  }
+
+  relocate(location: string) {
+    if (location !== null) {
+      location = location.trim();
+      if (location !== '' && this.location == location) {
+        this.apply(new CalendarEntryRelocated(this.tenant, this.calendarId, this.calendarEntryId, location))
+      }
+    }
+  }
+
+  reschedule(description: string, location: string, timespan: TimeSpan, repetition: Repetition, alarm: Alarm) {
+    this.assertArgumentNotNull(alarm, "The alarm must be provided.");
+    this.assertArgumentNotNull(repetition, "The repetition must be provided.");
+    this.assertArgumentNotNull(timespan, "The time span must be provided.");
+
+    if (isDoesNotRepeat(repetition.repeats)) {
+      repetition = Repetition.doesNotRepeatInstance(timespan.ends);
+    }
+
+    this.assertTimeSpans(repetition, timespan);
+    this.changeDescription(description);
+    this.relocate(location);
+    this.apply(new CalendarEntryRescheduled(
+      this.tenant, this.calendarId, this.calendarEntryId, timespan, repetition, alarm
+    ))
   }
 }
