@@ -1,5 +1,10 @@
+import { Alarm } from 'src/collaboration/domain/model/calendar/alarm';
+import { AlarmUnitsType } from 'src/collaboration/domain/model/calendar/alarm-units-type';
 import { CalendarEntryId } from 'src/collaboration/domain/model/calendar/calendar-entry-id';
 import { CalendarEntryRepository } from 'src/collaboration/domain/model/calendar/calendar-entry.repository';
+import { RepeatType } from 'src/collaboration/domain/model/calendar/repeat-type';
+import { Repetition } from 'src/collaboration/domain/model/calendar/repetition';
+import { TimeSpan } from 'src/collaboration/domain/model/calendar/time-span';
 import { CollaboratorService } from 'src/collaboration/domain/model/collaborator/collaborator.service';
 import { Participant } from 'src/collaboration/domain/model/collaborator/participant';
 import { Tenant } from 'src/collaboration/domain/model/tenant/tenant';
@@ -59,6 +64,50 @@ export class CalendarEntryApplicationService {
     );
 
     calendarEntry.relocate(location);
+    this.calendarEntryRepository.save(calendarEntry);
+  }
+
+  rescheduleCalendarEntry(
+    tenantId: string,
+    calendarEntryId: string,
+    description: string,
+    location: string,
+    timeSpanBegins: Date,
+    timSpanEnds: Date,
+    repeatType: string,
+    repeatEndsOnDate: Date,
+    alarmType: string,
+    anAlarmUnits: number,
+  ) {
+    const tenant = new Tenant(tenantId);
+    const calendarEntry = this.calendarEntryRepository.calendarEntryOfId(
+      tenant,
+      new CalendarEntryId(calendarEntryId),
+    );
+    calendarEntry.reschedule(
+      description,
+      location,
+      new TimeSpan(timeSpanBegins, timSpanEnds),
+      // TODO: implement valueOf function to convert string to enum type
+      new Repetition(RepeatType.valueOf(repeatType), repeatEndsOnDate),
+      new Alarm(AlarmUnitsType.valueOf(alarmType), anAlarmUnits),
+    );
+  }
+
+  uninviteCalendarEntryParticipant(
+    tenantId: string,
+    calendarEntryId: string,
+    particiapntsToInvite: Set<string>,
+  ) {
+    let tenant = new Tenant(tenantId);
+    let calendarEntry = this.calendarEntryRepository.calendarEntryOfId(
+      tenant,
+      new CalendarEntryId(calendarEntryId),
+    );
+    for (let participant of this.inviteesFrom(tenant, particiapntsToInvite)) {
+      calendarEntry.uninvite(participant);
+    }
+
     this.calendarEntryRepository.save(calendarEntry);
   }
 

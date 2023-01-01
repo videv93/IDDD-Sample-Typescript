@@ -7,11 +7,8 @@ import { Tenant } from '../tenant/tenant';
 import { Alarm } from './alarm';
 import { CalendarEntryDescriptionChanged } from './calendar-entry-description-changed';
 import { CalendarEntryId } from './calendar-entry-id';
-import { CalendarEntryParticipantInvited } from './calendar-entry-participant-invited';
-import { CalendarEntryParticipantUninvited } from './calendar-entry-participant-uninvited';
 import { CalendarEntryRelocated } from './calendar-entry-relocated';
 import { CalendarEntryRescheduled } from './calendar-entry-rescheduled';
-import { CalendarEntryScheduled } from './calendar-entry-scheduled';
 import { CalendarId } from './calendar-id';
 import { isDoesNotRepeat } from './repeat-type';
 import { Repetition } from './repetition';
@@ -159,100 +156,6 @@ export class CalendarEntry extends EventSourceRootEntity {
         alarm,
       ),
     );
-  }
-
-  uninvite(participant: Participant) {
-    this.assertArgumentNotNull(
-      participant,
-      'The participant must be provided.',
-    );
-    if (this.invitees.has(participant)) {
-      this.apply(
-        new CalendarEntryParticipantUninvited(
-          this.tenant,
-          this.calendarId,
-          this.calendarEntryId,
-          participant,
-        ),
-      );
-    }
-  }
-
-  set description(description: string) {
-    this._description = description;
-  }
-
-  set location(location: string) {
-    this._location = location;
-  }
-
-  set repetition(repetition: Repetition) {
-    this._repetition = repetition;
-  }
-
-  set timeSpan(timeSpan: TimeSpan) {
-    this._timeSpan = timeSpan;
-  }
-
-  set invitees(invitees: Set<Participant>) {
-    this._invitees = invitees;
-  }
-
-  set owner(owner: Owner) {
-    this._owner = owner;
-  }
-
-  set tenant(tenant: Tenant) {
-    this._tenant = tenant;
-  }
-
-  set calendarEntryId(calendarEntryId: CalendarEntryId) {
-    this._calendarEntryId = calendarEntryId;
-  }
-
-  set calendarId(calendarId: CalendarId) {
-    this._calendarId = calendarId;
-  }
-
-  // TODO: resolve duplicate function name in typescript
-  protected when(event: CalendarEntryDescriptionChanged) {
-    this.description = event.description;
-  }
-
-  // TODO: resolve duplicate function name in typescript
-  protected when(event: CalendarEntryParticipantInvited) {
-    this.invitees.add(event.participant);
-  }
-
-  // TODO: resolve duplicate function name in typescript
-  protected when(event: CalendarEntryRelocated) {
-    this.location = event.location;
-  }
-
-  // TODO: resolve duplicate function name in typescript
-  protected when(event: CalendarEntryRescheduled) {
-    this.alarm = event.alarm;
-    this.repetition = event.repetition;
-    this.timeSpan = event.timeSpan;
-  }
-
-  // TODO: resolve duplicate function name in typescript
-  protected when(event: CalendarEntryScheduled) {
-    this.alarm = event.alarm;
-    this.calendarEntryId = event.calendarEntryId;
-    this.calendarId = event.calendarId;
-    this.description = event.description;
-    this.invitees = event.invitees;
-    this.location = event.location;
-    this.owner = event.owner;
-    this.repetition = event.repetition;
-    this.tenant = event.tenant;
-    this.timeSpan = event.timeSpan;
-  }
-
-  // TODO: resolve duplicate function name in typescript
-  protected when(event: CalendarEntryParticipantUninvited) {
-    this.invitees.delete(event.participant);
   }
 
   assertTimeSpans(repetition: Repetition, timeSpan: TimeSpan) {
