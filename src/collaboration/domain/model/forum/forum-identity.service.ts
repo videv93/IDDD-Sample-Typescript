@@ -1,14 +1,17 @@
-import { DiscussionRepository } from "./discussion.repository";
-import { ForumRepository } from "./forum.repository";
-import { PostRepository } from "./post.repository";
+import { DiscussionRepository } from './discussion.repository';
+import { ForumRepository } from './forum.repository';
+import { PostRepository } from './post.repository';
 
 export class ForumIdentityService {
   private _discussionRepository: DiscussionRepository;
   private _forumRepository: ForumRepository;
   private _postRepository: PostRepository;
 
-  constructor(forumRepository: ForumRepository, discussionRepository: DiscussionRepository,
-    postRepository: PostRepository) {
+  constructor(
+    forumRepository: ForumRepository,
+    discussionRepository: DiscussionRepository,
+    postRepository: PostRepository,
+  ) {
     this._discussionRepository = discussionRepository;
     this._forumRepository = forumRepository;
     this._postRepository = postRepository;

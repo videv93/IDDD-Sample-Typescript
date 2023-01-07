@@ -1,13 +1,15 @@
-import { DomainEvent } from "src/common/domain/model";
-import { EventSourceRootEntity } from "src/common/domain/model/event-source-root-entity";
-import { IllegalArgumentException } from "src/common/illegal-argument.exception";
-import { Author } from "../collaborator/author";
-import { Tenant } from "../tenant/tenant";
-import { DiscussionClosed } from "./discussion-closed";
-import { DiscussionId } from "./discussion-id";
-import { DiscussionReopened } from "./discussion-reopened";
-import { DiscussionStarted } from "./discussion-started";
-import { ForumId } from "./forum-id";
+import { EventSourceRootEntity } from 'src/common/domain/model/event-source-root-entity';
+import { IllegalArgumentException } from 'src/common/illegal-argument.exception';
+import { Author } from '../collaborator/author';
+import { Tenant } from '../tenant/tenant';
+import { DiscussionClosed } from './discussion-closed';
+import { DiscussionId } from './discussion-id';
+import { DiscussionReopened } from './discussion-reopened';
+import { DiscussionStarted } from './discussion-started';
+import { ForumId } from './forum-id';
+import { ForumIdentityService } from './forum-identity.service';
+import { Post } from './post';
+import { PostId } from './post-id';
 
 export class Discussion extends EventSourceRootEntity {
   private _author: Author;
@@ -18,17 +20,75 @@ export class Discussion extends EventSourceRootEntity {
   private _subject: string;
   private _tenant: Tenant;
 
+  /*
   constructor(eventStream: DomainEvent[], streamVersion: number) {
     super(eventStream, streamVersion);
   }
+  */
 
-  constructor(tenantId: Tenant, forumId: ForumId, discussionId: DiscussionId, authro: Author, subject: string, exclusiveOwner: string) {
-    this.assertArgumentNotNull(author, "The author must be provided.");
-    this.assertArgumentNotNull(discussionId, "The discussion id must be provided.");
-    this.assertArgumentNotNull(forumId, "The forum id must be provided.");
-    this.assertArgumentNotEmpty(tenantId, "The tenant must be provided.");
+  constructor(
+    tenantId: Tenant,
+    forumId: ForumId,
+    discussionId: DiscussionId,
+    author: Author,
+    subject: string,
+    exclusiveOwner: string,
+  ) {
+    super();
+    this.assertArgumentNotNull(author, 'The author must be provided.');
+    this.assertArgumentNotNull(
+      discussionId,
+      'The discussion id must be provided.',
+    );
+    this.assertArgumentNotNull(forumId, 'The forum id must be provided.');
+    this.assertArgumentNotNull(tenantId, 'The tenant must be provided.');
 
-    this.apply(new DiscussionStarted(tenantId, forumId, discussionId, author, subject, exclusiveOwner))
+    this.apply(
+      new DiscussionStarted(
+        tenantId,
+        forumId,
+        discussionId,
+        author,
+        subject,
+        exclusiveOwner,
+      ),
+    );
+  }
+
+  post(
+    forumIdentityService: ForumIdentityService,
+    author: Author,
+    subject: string,
+    bodyText: string,
+    replyToPost?: PostId,
+  ) {
+    let post = new Post(
+      this.tenant,
+      this.forumId,
+      this.discussionId,
+      forumIdentityService.nextPostId(),
+      author,
+      subject,
+      bodyText,
+      replyToPost,
+    );
+
+    return post;
+  }
+
+  reopen() {
+    if (this.isClosed) {
+      throw new IllegalArgumentException('The discussion is not closed.');
+    }
+
+    this.apply(
+      new DiscussionReopened(
+        this.tenant,
+        this.forumId,
+        this.discussionId,
+        this.exclusiveOwner,
+      ),
+    );
   }
 
   set author(author: Author) {
@@ -85,23 +145,33 @@ export class Discussion extends EventSourceRootEntity {
 
   close() {
     if (this.isClosed()) {
-      throw new IllegalArgumentException("This discussion is already closed.");
+      throw new IllegalArgumentException('This discussion is already closed.');
     }
-    this.apply(new DiscussionClosed(this.tenant, this.forumId, this.discussionId, this.exclusiveOwner))
+    this.apply(
+      new DiscussionClosed(
+        this.tenant,
+        this.forumId,
+        this.discussionId,
+        this.exclusiveOwner,
+      ),
+    );
   }
 
   isClosed() {
     return this._closed;
   }
 
+  // TODO: fix duplicate method name
   when(event: DiscussionClosed): void {
     this.closed = true;
   }
 
+  // TODO: fix duplicate method name
   when(event: DiscussionReopened) {
     this.closed = false;
   }
 
+  // TODO: fix duplicate method name
   when(event: DiscussionStarted) {
     this.author = event.author;
     this.discussionId = event.discussionId;
