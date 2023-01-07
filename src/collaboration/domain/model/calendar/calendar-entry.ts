@@ -1,5 +1,4 @@
 import moment from 'moment';
-import { DomainEvent } from 'src/common/domain/model';
 import { EventSourceRootEntity } from 'src/common/domain/model/event-source-root-entity';
 import { Owner } from '../collaborator/owner';
 import { Participant } from '../collaborator/participant';
@@ -62,7 +61,32 @@ export class CalendarEntry extends EventSourceRootEntity {
     this.assertArgumentNotNull(owner, 'The owner must be provided.');
     this.assertArgumentNotNull(repetition, 'The repetition must be provided.');
     this.assertArgumentNotNull(tenant, 'The tenant must be provided.');
-    this.assertArgumentNotNull(timespan);
+    this.assertArgumentNotNull(timeSpan, 'The time span must be provided.');
+
+    if (isDoesNotRepeat(repetition.repeats)) {
+      repetition = Repetition.doesNotRepeatInstance(timeSpan.ends);
+    }
+
+    this.assertTimeSpans(repetition, timeSpan);
+
+    if (invitees == null) {
+      invitees = new Set<Participant>();
+    }
+
+    this.apply(
+      new CalendarEntryScheduled(
+        tenant,
+        calendarId,
+        calendarEntryId,
+        description,
+        location,
+        owner,
+        timeSpan,
+        repetition,
+        alarm,
+        invitees,
+      ),
+    );
   }
 
   get alarm() {
