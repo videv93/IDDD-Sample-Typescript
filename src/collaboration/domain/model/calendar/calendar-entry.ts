@@ -29,8 +29,40 @@ export class CalendarEntry extends EventSourceRootEntity {
   private _tenant: Tenant;
   private _timeSpan: TimeSpan;
 
+  /*
   constructor(eventStream: Array<DomainEvent>, streamVersion: number) {
     super(eventStream, streamVersion);
+  }
+  */
+
+  constructor(
+    tenant: Tenant,
+    calendarId: CalendarId,
+    calendarEntryId: CalendarEntryId,
+    description: string,
+    location: string,
+    owner: Owner,
+    timeSpan: TimeSpan,
+    repetition: Repetition,
+    alarm: Alarm,
+    invitees: Set<Participant>,
+  ) {
+    super();
+    this.assertArgumentNotNull(alarm, 'The alarm must be provided.');
+    this.assertArgumentNotNull(
+      calendarEntryId,
+      'The calendar entry id must be provided.',
+    );
+    this.assertArgumentNotNull(calendarId, 'The calendar id must be provided.');
+    this.assertArgumentNotEmpty(
+      description,
+      'The description must be provided.',
+    );
+    this.assertArgumentNotEmpty(location, 'The location must be provided.');
+    this.assertArgumentNotNull(owner, 'The owner must be provided.');
+    this.assertArgumentNotNull(repetition, 'The repetition must be provided.');
+    this.assertArgumentNotNull(tenant, 'The tenant must be provided.');
+    this.assertArgumentNotNull(timespan);
   }
 
   get alarm() {

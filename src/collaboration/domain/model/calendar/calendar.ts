@@ -65,7 +65,6 @@ export class Calendar extends EventSourceRootEntity {
     return this._calendarId;
   }
 
-
   get tenant() {
     return this._tenant;
   }
@@ -104,12 +103,7 @@ export class Calendar extends EventSourceRootEntity {
   rename(name: string): void {
     this.assertArgumentNotEmpty(name, 'The name must be provided.');
     this.apply(
-      new CalendarRenamed(
-        this.tenant,
-        this.calendarId,
-        name,
-        this.description,
-      ),
+      new CalendarRenamed(this.tenant, this.calendarId, name, this.description),
     );
   }
 
@@ -139,16 +133,36 @@ export class Calendar extends EventSourceRootEntity {
   }
 
   shareCalendarWith(calendarSharer: CalendarSharer) {
-    this.assertArgumentNotNull(calendarSharer, "The calendar sharer must be provided.");
+    this.assertArgumentNotNull(
+      calendarSharer,
+      'The calendar sharer must be provided.',
+    );
     if (!this.sharedWith.has(calendarSharer)) {
-      this.apply(new CalendarShared(this.tenant, this.calendarId, this.name, calendarSharer));
+      this.apply(
+        new CalendarShared(
+          this.tenant,
+          this.calendarId,
+          this.name,
+          calendarSharer,
+        ),
+      );
     }
   }
 
   unshareCalendarWith(calendarSharer: CalendarSharer) {
-    this.assertArgumentNotNull(calendarSharer, "The calendar sharer must be provided.");
+    this.assertArgumentNotNull(
+      calendarSharer,
+      'The calendar sharer must be provided.',
+    );
     if (this.sharedWith.has(calendarSharer)) {
-      this.apply(new CalendarUnshared(this.tenant, this.calendarId, this.name, calendarSharer));
+      this.apply(
+        new CalendarUnshared(
+          this.tenant,
+          this.calendarId,
+          this.name,
+          calendarSharer,
+        ),
+      );
     }
   }
 
@@ -175,7 +189,7 @@ export class Calendar extends EventSourceRootEntity {
   set tenant(tenant: Tenant) {
     this._tenant = tenant;
   }
-
+  // TODO: fix duplicate function name
   when(event: CalendarCreated) {
     this.calendarId = event.calendarId;
     this.description = event.description;
@@ -185,18 +199,22 @@ export class Calendar extends EventSourceRootEntity {
     this.tenant = event.tenant;
   }
 
+  // TODO: fix duplicate function name
   when(event: CalendarDescriptionChanged) {
     this.description = event.description;
   }
 
+  // TODO: fix duplicate function name
   when(event: CalendarRenamed) {
     this.name = event.name;
   }
 
+  // TODO: fix duplicate function name
   when(event: CalendarShared) {
     this.sharedWith.add(event.calendarSharer());
   }
 
+  // TODO: fix duplicate function name
   when(event: CalendarUnshared) {
     this.sharedWith.delete(event.calendarSharer);
   }

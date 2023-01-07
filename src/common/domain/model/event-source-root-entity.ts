@@ -23,9 +23,10 @@ export abstract class EventSourceRootEntity extends AssertionConcern {
     return this._unmutatedVersion;
   }
 
+  // protected constructor();
   protected constructor(
-    eventStream: Array<DomainEvent>,
-    streamVersion: number,
+    eventStream?: Array<DomainEvent>,
+    streamVersion?: number,
   ) {
     super();
     for (const event of eventStream) {
@@ -63,13 +64,13 @@ export abstract class EventSourceRootEntity extends AssertionConcern {
     } catch (e) {
       throw new IllegalArgumentException(
         'I do not understand ' +
-        EventSourceRootEntity.MUTATOR_METHOD_NAME +
-        '(' +
-        eventType +
-        ') because: ' +
-        e.constructor.name +
-        '>>>' +
-        (e as Error).message,
+          EventSourceRootEntity.MUTATOR_METHOD_NAME +
+          '(' +
+          eventType +
+          ') because: ' +
+          e.constructor.name +
+          '>>>' +
+          (e as Error).message,
       );
     }
   }
