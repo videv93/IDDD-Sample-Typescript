@@ -1,5 +1,10 @@
+import { Entity } from 'src/common/domain/model/entity';
 import { DiscussionAvailability } from '../dicussion/discussion-availability';
-import { Entity } from '../entity';
+import { ProductOwnerId } from '../team/product-owner-id';
+import { TenantId } from '../tenant/tenant-id';
+import { ProductBacklogItem } from './product-backlog-item';
+import { ProductDiscussion } from './product-discussion';
+import { ProductId } from './product-id';
 
 export class Product extends Entity {
   private _backlogItems: Set<ProductBacklogItem>;
@@ -35,7 +40,7 @@ export class Product extends Entity {
     this._name = name;
   }
 
-  set tenantId(tenantId: string) {
+  set tenantId(tenantId: TenantId) {
     this._tenantId = tenantId;
   }
 
@@ -57,6 +62,10 @@ export class Product extends Entity {
 
   set productOwnerId(productOwnerId: ProductOwnerId) {
     this._productOwnerId = productOwnerId;
+  }
+
+  get backlogItems() {
+    return this._backlogItems;
   }
 
   get name() {

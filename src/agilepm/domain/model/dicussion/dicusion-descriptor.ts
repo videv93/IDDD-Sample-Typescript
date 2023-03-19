@@ -1,6 +1,6 @@
 import { ValudeObject } from '../value-object';
 
-export class DiscusionDescriptor extends ValudeObject {
+export class DiscussionDescriptor extends ValudeObject {
   static UNDEFINED_ID: string = 'UNDEFINED';
 
   private _id: string;
