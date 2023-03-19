@@ -40,59 +40,59 @@ export class Product extends Entity {
     this._name = name;
   }
 
-  set tenantId(tenantId: TenantId) {
-    this._tenantId = tenantId;
-  }
-
-  set productId(productId: ProductId) {
-    this._productId = productId;
-  }
-
-  set description(description: string) {
-    this._description = description;
-  }
-
-  set discussion(discussion: ProductDiscussion) {
-    this._discussion = discussion;
-  }
-
-  set discussionInitiationId(discussionInitiationId: string) {
-    this._discussionInitiationId = discussionInitiationId;
-  }
-
-  set productOwnerId(productOwnerId: ProductOwnerId) {
-    this._productOwnerId = productOwnerId;
-  }
-
-  get backlogItems() {
-    return this._backlogItems;
-  }
-
   get name() {
     return this._name;
+  }
+
+  set tenantId(tenantId: TenantId) {
+    this._tenantId = tenantId;
   }
 
   get tenantId() {
     return this._tenantId;
   }
 
+  set productId(productId: ProductId) {
+    this._productId = productId;
+  }
+
   get productId() {
     return this._productId;
+  }
+
+  set description(description: string) {
+    this._description = description;
   }
 
   get description() {
     return this._description;
   }
 
+  set discussion(discussion: ProductDiscussion) {
+    this._discussion = discussion;
+  }
+
   get discussion() {
     return this._discussion;
+  }
+
+  set discussionInitiationId(discussionInitiationId: string) {
+    this._discussionInitiationId = discussionInitiationId;
   }
 
   get discussionInitiationId() {
     return this._discussionInitiationId;
   }
 
+  set productOwnerId(productOwnerId: ProductOwnerId) {
+    this._productOwnerId = productOwnerId;
+  }
+
   get productOwnerId() {
     return this._productOwnerId;
+  }
+
+  get backlogItems() {
+    return this._backlogItems;
   }
 }

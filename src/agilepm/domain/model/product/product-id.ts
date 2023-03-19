@@ -1,4 +1,4 @@
-import { ValudeObject } from "../value-object";
+import { ValudeObject } from '../value-object';
 
 export class ProductId extends ValudeObject {
   private _id: string;
@@ -9,9 +9,18 @@ export class ProductId extends ValudeObject {
     this.id = id;
   }
 
+  get id() {
+    return this._id;
+  }
+
   set id(id: string) {
     this.assertArgumentNotEmpty(id, 'The id must be provided.');
-    this.assertArgumentLength(id, 36, ' The id must be 36 characters or less.')
+    this.assertArgumentLength(
+      id,
+      1,
+      36,
+      ' The id must be 36 characters or less.',
+    );
 
     this._id = id;
   }
