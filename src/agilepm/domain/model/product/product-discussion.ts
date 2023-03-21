@@ -1,11 +1,11 @@
 import { IllegalArgumentException } from 'src/common/illegal-argument.exception';
 import { DiscussionDescriptor } from '../dicussion/dicusion-descriptor';
 import { DiscussionAvailability } from '../dicussion/discussion-availability';
-import { ValudeObject } from '../value-object';
+import { ValueObject } from '../value-object';
 
 import { isReady } from '../dicussion/discussion-availability';
 
-export class ProductDiscussion extends ValudeObject {
+export class ProductDiscussion extends ValueObject {
   private _availability: DiscussionAvailability;
   private _descriptor: DiscussionDescriptor;
 

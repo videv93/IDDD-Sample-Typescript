@@ -1,6 +1,6 @@
-import { ValudeObject } from '../value-object';
+import { ValueObject } from '../value-object';
 
-export class TenantId extends ValudeObject {
+export class TenantId extends ValueObject {
   private _id: string;
 
   constructor(id: string) {

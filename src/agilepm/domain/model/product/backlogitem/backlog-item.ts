@@ -2,8 +2,11 @@ import { DomainEventPublisher } from 'src/common/domain/model/domain-event-publi
 import { IllegalArgumentException } from 'src/common/illegal-argument.exception';
 import { DiscussionAvailability } from '../../dicussion/discussion-availability';
 import { Entity } from '../../entity';
+import { TeamMember } from '../../team/team-member';
 import { TenantId } from '../../tenant/tenant-id';
 import { ProductId } from '../product-id';
+import { ReleaseId } from '../release/release-id';
+import { SprintId } from '../sprint/sprint-id';
 import { BacklogItemDiscussion } from './backlog-item-discussion';
 import { BacklogItemId } from './backlog-item-id';
 import { BacklogItemStatus } from './backlog-item-status';

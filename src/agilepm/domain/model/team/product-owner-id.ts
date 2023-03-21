@@ -1,7 +1,7 @@
 import { TenantId } from 'src/identityaccess/domain/identity/tenant-id';
-import { ValudeObject } from '../value-object';
+import { ValueObject } from '../value-object';
 
-export class ProductOwnerId extends ValudeObject {
+export class ProductOwnerId extends ValueObject {
   private _id: string;
   private _tenantId: TenantId;
 

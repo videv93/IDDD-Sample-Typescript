@@ -1,11 +1,10 @@
-import { ValueObject } from '../value-object';
+import { ValueObject } from '../../value-object';
 
-export class ProductId extends ValueObject {
+export class SprintId extends ValueObject {
   private _id: string;
 
   constructor(id: string) {
     super();
-
     this.id = id;
   }
 
@@ -19,7 +18,7 @@ export class ProductId extends ValueObject {
       id,
       1,
       36,
-      ' The id must be 36 characters or less.',
+      'The id must be 36 characters or less.',
     );
 
     this._id = id;
