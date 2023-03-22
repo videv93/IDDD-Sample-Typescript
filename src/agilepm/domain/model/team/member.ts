@@ -1,6 +1,7 @@
 import { Entity } from '../entity';
 import { TenantId } from '../tenant/tenant-id';
 import { MemberChangeTracker } from './member-change-tracker';
+import { TeamMemberId } from './team-member-id';
 
 export abstract class Member extends Entity {
   private _changeTracker: MemberChangeTracker;
@@ -10,6 +11,10 @@ export abstract class Member extends Entity {
   private _lastName: string;
   private _tenantId: TenantId;
   private _username: string;
+
+  get teamMemberId() {
+    return new TeamMemberId(this.tenantId, this.username);
+  }
 
   constructor(
     tenantId: TenantId,
