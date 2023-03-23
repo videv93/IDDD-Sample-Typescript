@@ -22,6 +22,7 @@ export class Task extends Entity {
   private _volunteer: TeamMemberId;
 
   allEstimationLogEntries() {
+    console.log('test');
     return this.estimationLog;
   }
 
