@@ -13,7 +13,7 @@ export class EstimationLogEntry extends Entity {
     return new Date();
   }
 
-  protected constructor(
+  constructor(
     tenantId: TenantId,
     taskId: TaskId,
     date: Date,
