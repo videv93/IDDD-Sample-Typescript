@@ -6,9 +6,14 @@ import { TeamMemberId } from '../../team/team-member-id';
 import { TenantId } from '../../tenant/tenant-id';
 import { BacklogItemId } from './backlog-item-id';
 import { EstimationLogEntry } from './estimation-log-entry';
+import { TaskDescribed } from './task-described';
+import { TaskHoursRemainingEstimated } from './task-hours-remaining-estimated';
 import { TaskId } from './task-id';
 import { isInProgress, TaskStatus } from './task-status';
+import { TaskStatusChanged } from './task-status-changed';
 import { TaskVolunteerAssigned } from './task-volunteer-assigned';
+import { isDone } from './task-status';
+import { TaskRenamed } from './task-renamed';
 
 export class Task extends Entity {
   private _backlogItemId: BacklogItemId;
@@ -143,6 +148,12 @@ export class Task extends Entity {
   }
 
   set description(description: string) {
+    this.assertArgumentLength(
+      description,
+      1,
+      65000,
+      'Description must be 65000 chacraters or less.',
+    );
     this._description = description;
   }
 
@@ -216,13 +227,13 @@ export class Task extends Entity {
   }
 
   private logEstimation(hoursRemaining: number) {
-    let today = EstimationLogEntry.currentLogDate();
+    const today = EstimationLogEntry.currentLogDate();
 
     let updatedLogForToday = false;
-    let iterator = this.estimationLog[Symbol.iterator]();
+    const iterator = this.estimationLog[Symbol.iterator]();
 
     while (!updatedLogForToday) {
-      let entry = iterator.next().value;
+      const entry = iterator.next().value;
       updatedLogForToday = entry.updateHoursRemainingWhenDateMatches(
         hoursRemaining,
         today,
