@@ -17,8 +17,11 @@ import { BusinessPriorityAssigned } from './business-priority-assigned';
 import { StoryPoints } from './story-point';
 import { Task } from './task';
 import { TaskId } from './task-id';
+import { TaskStatus } from './task-status';
+import { isScheduled } from './backlog-item-status';
+import { Sprint } from '../sprint/sprint';
 
-class BacklogItem extends Entity {
+export class BacklogItem extends Entity {
   private _associatedIssueId: string;
   private _backlogItemId: BacklogItemId;
   private _businessPriority: BusinessPriority;
@@ -123,6 +126,118 @@ class BacklogItem extends Entity {
         this.businessPriority,
       ),
     );
+  }
+
+  changeCategory(category: string) {
+    this.category = category;
+
+    DomainEventPublisher.instance().publish(
+      new BackLogItemCategoryChanged(
+        this.tenantId,
+        this.backlogItemId,
+        this.category,
+      ),
+    );
+  }
+
+  changeTaskStatus(taskId: TaskId, status: TaskStatus) {
+    const task = this.task(taskId);
+
+    if (task == null) {
+      throw new IllegalArgumentException('Task does not exist.');
+    }
+
+    task.changeStatus(status);
+  }
+
+  changeType(type: BacklogItemType) {
+    this.type = type;
+    DomainEventPublisher.instance().publish(
+      new BacklogItemTypeChanged(this.tenantId, this.backlogItemId, this.type),
+    );
+  }
+
+  commitTo(sprint: Sprint) {
+    this.assertArgumentNotNull(sprint, 'Sprint must be provided');
+    this.assertArgumentEquals(
+      sprint.tenantId,
+      this.tenantId,
+      'Sprint must be of same tenant.',
+    );
+    this.assertArgumentEquals(
+      sprint.productId,
+      this.productId,
+      'Sprint must be of same product.',
+    );
+    if (!this.isScheduledForRelease()) {
+      throw new IllegalArgumentException(
+        'Must be scheduled for release to commit to sprint.',
+      );
+    }
+
+    if (this.isCommittedToSprint()) {
+      if (!sprint.sprintId == this.sprintId) {
+        this.uncommitFromSprint();
+      }
+    }
+
+    this.elevateStatusWith(BacklogItemStatus.COMMITTED);
+
+    this.sprintId = sprint.sprintId;
+
+    DomainEventPublisher.instance().publish(
+      new BacklogItemCommited(this.tenantId, this.backlogItemId, this.sprintId),
+    );
+  }
+
+  elevateStatusWith(status: BacklogItemStatus) {
+    console.log(status);
+    if (isScheduled(this.status)) {
+      this.status = BacklogItemStatus.COMMITTED;
+    }
+  }
+
+  uncommitFromSprint() {
+    if (!this.isCommittedToSprint()) {
+      throw new IllegalArgumentException('Not currently commited.');
+    }
+
+    this.status = BacklogItemStatus.SCHEDULED;
+    const uncommittedSprintId = this.sprintId;
+
+    this.sprintId = null;
+
+    DomainEventPublisher.instance().publish(
+      new BacklogItemUncommitted(
+        this.tenantId,
+        this.backlogItemId,
+        uncommittedSprintId,
+      ),
+    );
+  }
+
+  isCommittedToSprint() {
+    return this.sprintId != null;
+  }
+
+  isScheduledForRelease() {
+    return this.releaseId != null;
+  }
+
+  set sprintId(sprintId: SprintId) {
+    this._sprintId = sprintId;
+  }
+
+  get sprintId() {
+    return this._sprintId;
+  }
+
+  set releaseId(releaseId: ReleaseId) {
+    this._releaseId = releaseId;
+  }
+
+  get releaseId() {
+    return this._releaseId;
   }
 
   taskHoursRemaining() {

@@ -1,0 +1,66 @@
+import { IllegalArgumentException } from 'src/common/illegal-argument.exception';
+import { Entity } from '../../entity';
+import { TenantId } from '../../tenant/tenant-id';
+import { ProductId } from '../product-id';
+import { SprintId } from './sprint-id';
+
+export class Sprint extends Entity {
+  private _backlogItems: Set<CommittedBacklogItem>;
+  private _begins: Date;
+  private _ends: Date;
+  private _goals: string;
+  private _name: string;
+  private _productId: ProductId;
+  private _retrospective: string;
+  private _sprintId: SprintId;
+  private _tenantId: TenantId;
+
+  constructor(
+    tenantId: TenantId,
+    productId: ProductId,
+    sprintId: SprintId,
+    name: string,
+    goals: string,
+    begins: Date,
+    ends: Date,
+  ) {
+    super();
+    if (ends.getTime() > before.getTime()) {
+      throw new IllegalArgumentException(
+        'Sprint must not end before it begin.',
+      );
+    }
+
+    this.begins = begins;
+    this.ends = ends;
+    this.goals = goals;
+    this.name = name;
+    this.productId = productId;
+    this.sprintId = sprintId;
+    this.tenantId = tenantId;
+  }
+
+  set begins(begins: Date) {
+    this._begins = begins;
+  }
+
+  set ends(ends: Date) {
+    this._ends = ends;
+  }
+
+  set name(name: string) {
+    this._name = name;
+  }
+
+  set productId(productId: ProductId) {
+    this._productId = productId;
+  }
+
+  set sprintId(sprintId: SprintId) {
+    this._sprintId = sprintId;
+  }
+
+  set tenantId(tenantId: TenantId) {
+    this._tenantId = tenantId;
+  }
+}
