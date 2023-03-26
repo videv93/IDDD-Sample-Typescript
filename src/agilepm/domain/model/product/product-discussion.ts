@@ -1,6 +1,9 @@
 import { IllegalArgumentException } from 'src/common/illegal-argument.exception';
 import { DiscussionDescriptor } from '../dicussion/dicusion-descriptor';
-import { DiscussionAvailability } from '../dicussion/discussion-availability';
+import {
+  DiscussionAvailability,
+  isRequested,
+} from '../dicussion/discussion-availability';
 import { ValueObject } from '../value-object';
 
 import { isReady } from '../dicussion/discussion-availability';
@@ -27,6 +30,21 @@ export class ProductDiscussion extends ValueObject {
       DiscussionDescriptor.UNDEFINED_ID,
     );
     return new ProductDiscussion(descriptor, availability);
+  }
+
+  nowReady(descriptor: DiscussionDescriptor) {
+    if (descriptor == null || descriptor == undefined) {
+      throw new IllegalArgumentException(
+        'The discussion descriptor must be defined.',
+      );
+    }
+    if (!isRequested(this.availability)) {
+      throw new IllegalArgumentException(
+        'The discussion must be requested first',
+      );
+    }
+
+    return new ProductDiscussion(descriptor, DiscussionAvailability.READY);
   }
 
   set descriptor(descriptor: DiscussionDescriptor) {

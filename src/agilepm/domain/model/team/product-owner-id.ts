@@ -1,4 +1,4 @@
-import { TenantId } from 'src/identityaccess/domain/identity/tenant-id';
+import { TenantId } from '../tenant/tenant-id';
 import { ValueObject } from '../value-object';
 
 export class ProductOwnerId extends ValueObject {

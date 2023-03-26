@@ -1,10 +1,26 @@
+import { DomainEventPublisher } from 'src/common/domain/model/domain-event-publisher';
 import { Entity } from 'src/common/domain/model/entity';
-import { DiscussionAvailability } from '../dicussion/discussion-availability';
+import { IllegalArgumentException } from 'src/common/illegal-argument.exception';
+import { DiscussionDescriptor } from '../dicussion/dicusion-descriptor';
+import {
+  isRequested,
+  isReady,
+  DiscussionAvailability,
+} from '../dicussion/discussion-availability';
+import { ProductOwner } from '../team/product-owner';
 import { ProductOwnerId } from '../team/product-owner-id';
 import { TenantId } from '../tenant/tenant-id';
+import { BacklogItemId } from './backlogitem/backlog-item-id';
+import { BacklogItem } from './backlogitem/backlog-item';
+import { BacklogItemStatus } from './backlogitem/backlog-item-status';
+import { BacklogItemType } from './backlogitem/backlog-item-type';
+import { StoryPoints } from './backlogitem/story-point';
 import { ProductBacklogItem } from './product-backlog-item';
+import { ProductCreated } from './product-created';
 import { ProductDiscussion } from './product-discussion';
+import { ProductDiscussionInitiated } from './product-discussion-initiated';
 import { ProductId } from './product-id';
+import { ProductBacklogItemPlanned } from './product-backlog-item-planned';
 
 export class Product extends Entity {
   private _backlogItems: Set<ProductBacklogItem>;
@@ -34,6 +50,104 @@ export class Product extends Entity {
     this.name = name;
     this.productId = productId;
     this.productOwnerId = productOwnerId;
+
+    DomainEventPublisher.instance().publish(
+      new ProductCreated(
+        this.tenantId,
+        this.productId,
+        this.productOwnerId,
+        this.name,
+        this.description,
+        isRequested(this.discussion.availability),
+      ),
+    );
+  }
+
+  failDiscussionInitiation() {
+    if (!isReady(this.discussion.availability)) {
+      this.discussionInitiationId = null;
+      this.discussion = ProductDiscussion.fromAvailability(
+        DiscussionAvailability.FAILED,
+      );
+    }
+  }
+
+  initiateDiscussion(descriptor: DiscussionDescriptor) {
+    if (descriptor == null) {
+      throw new IllegalArgumentException('The descriptor must not be null.');
+    }
+
+    if (isRequested(this.discussion.availability)) {
+      this.discussion = this.discussion.nowReady(descriptor);
+      DomainEventPublisher.instance().publish(
+        new ProductDiscussionInitiated(
+          this.tenantId,
+          this.productId,
+          this.discussion,
+        ),
+      );
+    }
+  }
+
+  planBacklogItem(
+    backlogItemId: BacklogItemId,
+    summary: string,
+    category: string,
+    type: BacklogItemType,
+    storyPoints: StoryPoints,
+  ) {
+    const backlogItem = new BacklogItem(
+      this.tenantId,
+      this.productId,
+      backlogItemId,
+      summary,
+      category,
+      type,
+      BacklogItemStatus.PLANNED,
+      storyPoints,
+    );
+
+    DomainEventPublisher.instance().publish(
+      new ProductBacklogItemPlanned(
+        backlogItem.tenantId,
+        backlogItem.productId,
+        backlogItem.backlogItemId,
+        backlogItem.summary,
+        backlogItem.category,
+        backlogItem.type,
+        backlogItem.storyPoints,
+      ),
+    );
+  }
+
+  plannedProductBacklogItem(backlogItem: BacklogItem) {
+    this.assertArgumentEquals(
+      this.tenantId,
+      backlogItem.tenantId,
+      'The product and backlog item must have same tenant.',
+    );
+    this.assertArgumentEquals(
+      this.productId,
+      backlogItem.productId,
+      'The backlog item must belong to product.',
+    );
+
+    const ordering = this.backlogItems.size + 1;
+
+    const productBacklogItem = new ProductBacklogItem(
+      this.tenantId,
+      this.productId,
+      backlogItem.backlogItemId,
+      ordering,
+    );
+
+    this.backlogItems.add(productBacklogItem);
+  }
+
+  changeProductOwner(productOwner: ProductOwner) {
+    if (this.productOwnerId != productOwner.productOwnerId) {
+      this.productOwnerId = productOwner.productOwnerId;
+    }
   }
 
   set name(name: string) {

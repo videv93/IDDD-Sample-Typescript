@@ -62,7 +62,7 @@ export class Discussion extends EventSourceRootEntity {
     bodyText: string,
     replyToPost?: PostId,
   ) {
-    let post = new Post(
+    const post = new Post(
       this.tenant,
       this.forumId,
       this.discussionId,
@@ -91,6 +91,10 @@ export class Discussion extends EventSourceRootEntity {
     );
   }
 
+  get author(): Author {
+    return this._author;
+  }
+
   set author(author: Author) {
     this._author = author;
   }
@@ -99,16 +103,32 @@ export class Discussion extends EventSourceRootEntity {
     this._closed = isClosed;
   }
 
+  get discussionId() {
+    return this._discussionId;
+  }
+
   set discussionId(discussionId: DiscussionId) {
     this._discussionId = discussionId;
+  }
+
+  get exclusiveOwner() {
+    return this._exclusiveOwner;
   }
 
   set exclusiveOwner(exclusiveOwner: string) {
     this._exclusiveOwner = exclusiveOwner;
   }
 
+  get forumId() {
+    return this._forumId;
+  }
+
   set forumId(forumId: ForumId) {
     this._forumId = forumId;
+  }
+
+  get subject() {
+    return this._subject;
   }
 
   set subject(subject: string) {
@@ -117,26 +137,6 @@ export class Discussion extends EventSourceRootEntity {
 
   set tenant(tenant: Tenant) {
     this._tenant = tenant;
-  }
-
-  get forumId() {
-    return this._forumId;
-  }
-
-  get author(): Author {
-    return this._author;
-  }
-
-  get discussionId() {
-    return this._discussionId;
-  }
-
-  get exclusiveOwner() {
-    return this._exclusiveOwner;
-  }
-
-  get subject() {
-    return this._subject;
   }
 
   get tenant() {
