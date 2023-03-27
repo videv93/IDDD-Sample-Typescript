@@ -21,6 +21,10 @@ import { ProductDiscussion } from './product-discussion';
 import { ProductDiscussionInitiated } from './product-discussion-initiated';
 import { ProductId } from './product-id';
 import { ProductBacklogItemPlanned } from './product-backlog-item-planned';
+import { ProductDiscussionRequested } from './backlogitem/backlog-item-discussion-requested';
+import { Release } from './release/release';
+import { ReleaseId } from './release/release-id';
+import { ProductReleaseScheduled } from './product-release-schedulted';
 
 export class Product extends Entity {
   private _backlogItems: Set<ProductBacklogItem>;
@@ -142,6 +146,54 @@ export class Product extends Entity {
     );
 
     this.backlogItems.add(productBacklogItem);
+  }
+
+  requestDiscussion(discussionAvailability: DiscussionAvailability) {
+    if (isReady(this.discussion.availability)) {
+      this.discussion = ProductDiscussion.fromAvailability(
+        discussionAvailability,
+      );
+      DomainEventPublisher.instance().publish(
+        new ProductDiscussionRequested(
+          this.tenantId,
+          this.productId,
+          this.productOwnerId,
+          this.name,
+          this.description,
+          isRequested(this.discussion.availability),
+        ),
+      );
+    }
+  }
+
+  scheduleRelease(
+    releaseId: ReleaseId,
+    name: string,
+    description: string,
+    begins: Date,
+    ends: Date,
+  ) {
+    const release = new Release(
+      this.tenantId,
+      this.productId,
+      releaseId,
+      name,
+      description,
+      begins,
+      ends,
+    );
+    DomainEventPublisher.instance().publish(
+      new ProductReleaseScheduled(
+        release.tenantId,
+        release.productId,
+        release.releaseId,
+        release.name,
+        description,
+        release.begins,
+        release.ends,
+      ),
+    );
+    return release;
   }
 
   changeProductOwner(productOwner: ProductOwner) {
