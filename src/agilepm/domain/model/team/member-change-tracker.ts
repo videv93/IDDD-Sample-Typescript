@@ -12,4 +12,16 @@ export class MemberChangeTracker {
     this._nameChangedOn = nameChangedOn;
     this._enablingOn = enablingOn;
   }
+
+  enablingOn(date: Date) {
+    return new MemberChangeTracker(
+      date,
+      this._nameChangedOn,
+      this._emailAddressChangeOn,
+    );
+  }
+
+  canToggleEnabling(date: Date) {
+    return this._enablingOn.getTime() < date.getTime();
+  }
 }

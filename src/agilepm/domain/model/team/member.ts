@@ -39,6 +39,17 @@ export abstract class Member extends Entity {
     );
   }
 
+  enable(date: Date) {
+    if (this.changeTracker.canToggleEnabling(date)) {
+      this.enabled = true;
+      this.changeTracker = this.changeTracker.enablingOn(date);
+    }
+  }
+
+  set enabled(enabled: boolean) {
+    this._enabled = enabled;
+  }
+
   set changeTracker(tracker: MemberChangeTracker) {
     this._changeTracker = tracker;
   }
