@@ -10,5 +10,5 @@ export interface SprintRepository {
   removeAll(sprints: Sprint[]): void;
   save(sprint: Sprint): void;
   saveAll(sprints: Sprint[]): void;
-  sprintOfId(tenantId: TenantId, sprintId: SprintId): void;
+  sprintOfId(tenantId: TenantId, sprintId: SprintId): Sprint;
 }

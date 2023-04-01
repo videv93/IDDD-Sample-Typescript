@@ -1,25 +1,33 @@
 import { DiscussionDescriptor } from 'src/agilepm/domain/model/dicussion/dicusion-descriptor';
 import { DiscussionAvailability } from 'src/agilepm/domain/model/dicussion/discussion-availability';
+import { ProductDiscussionRequestTimedOut } from 'src/agilepm/domain/model/product/produc-discussion-request-timeout';
 import { Product } from 'src/agilepm/domain/model/product/product';
 import { ProductId } from 'src/agilepm/domain/model/product/product-id';
 import { ProductRepository } from 'src/agilepm/domain/model/product/product.repository';
-import { ProductOwnerId } from 'src/agilepm/domain/model/team/product-owner-id';
 import { ProductOwnerRepository } from 'src/agilepm/domain/model/team/product-owner.repository';
 import { TenantId } from 'src/agilepm/domain/model/tenant/tenant-id';
+import { ProcessId } from 'src/common/domain/model/process/process-id';
+import { TimeConstrainedProcessTracker } from 'src/common/domain/model/process/time-constrained-process-tracker';
+import { TimeConstrainedProcessTrackerRepository } from 'src/common/domain/model/process/time-constrainted-process-tracker.repository';
 import { IllegalArgumentException } from 'src/common/illegal-argument.exception';
 import { InitiateDiscussionCommand } from './initiate-discussion.command';
 import { NewProductCommand } from './new-product.command';
+import { RetryProductDiscussionCommand } from './retry-product-discussion.command';
+import { StartDiscussionInitiationCommand } from './start-discussion-initiation.command';
 
 export class ProductApplicationService {
   private _productOwnerRepository: ProductOwnerRepository;
   private _productRepository: ProductRepository;
+  private _processTrackerRepository: TimeConstrainedProcessTrackerRepository;
 
   constructor(
     productOwnerRepository: ProductOwnerRepository,
     productRepository: ProductRepository,
+    processtrackerRepository: TimeConstrainedProcessTrackerRepository,
   ) {
     this._productOwnerRepository = productOwnerRepository;
     this._productRepository = productRepository;
+    this._processTrackerRepository = processtrackerRepository;
   }
 
   initiateDiscussion(command: InitiateDiscussionCommand): void {
@@ -99,6 +107,78 @@ export class ProductApplicationService {
       availability = DiscussionAvailability.REQUESTED;
     }
     return availability;
+  }
+
+  retryProductDiscussionRequest(command: RetryProductDiscussionCommand) {
+    const processId = ProcessId.existingProcessId(command.processId);
+    const product = this.productRepository.productOfDiscussionInitiationId(
+      new TenantId(command.tenantId),
+      processId.id(),
+    );
+
+    if (product == null) {
+      throw new IllegalArgumentException(
+        'Unknown product with tenant id: ' +
+          command.tenantId +
+          ' and discussion initiatino id: ' +
+          processId.id(),
+      );
+    }
+
+    this.requestProductDiscussionFor(product);
+  }
+
+  startDiscussionInitiation(command: StartDiscussionInitiationCommand) {
+    try {
+      const product = this.productRepository.productOfId(
+        new TenantId(command.tenantId),
+        new ProductId(command.productId),
+      );
+      if (product == null) {
+        throw new IllegalArgumentException(
+          'Unknown product with tenant id: ' +
+            command.tenantId +
+            ' and product id: ' +
+            command.productId,
+        );
+      }
+
+      const tracker = this.processTrackerOfProduct(product);
+      this.processTrackerRepository.save(tracker);
+      product.startDiscussionInitiation(tracker.processId());
+      this.productRepository.save(product);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  processTrackerOfProduct(product: Product) {
+    let tracker = null;
+    if (product.discussionInitiationId != null) {
+      const processId = ProcessId.existingProcessId(
+        product.discussionInitiationId,
+      );
+      tracker = this.processTrackerRepository.trackerOfProcessId(
+        product.tenantId.id,
+        processId.id(),
+      );
+    } else {
+      const timedOutEventName = ProductDiscussionRequestTimedOut.name;
+      tracker = new TimeConstrainedProcessTracker(
+        product.tenantId.id,
+        ProcessId.newProcessId(),
+        'Create discussion for product: ' + product.name,
+        new Date(),
+        5 * 60 * 1000,
+        3,
+        timedOutEventName,
+      );
+    }
+    return tracker;
+  }
+
+  get processTrackerRepository() {
+    return this._processTrackerRepository;
   }
 
   get productOwnerRepository(): ProductOwnerRepository {

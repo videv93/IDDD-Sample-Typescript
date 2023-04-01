@@ -1,4 +1,4 @@
-export class StartDiscussionCommand {
+export class StartDiscussionInitiationCommand {
   private _tenantId: string;
   private _productId: string;
 

@@ -93,6 +93,12 @@ export class Product extends Entity {
     }
   }
 
+  startDiscussionInitiation(discussionInitiationId: string) {
+    if (!isReady(this.discussion.availability)) {
+      this.discussionInitiationId = discussionInitiationId;
+    }
+  }
+
   planBacklogItem(
     backlogItemId: BacklogItemId,
     summary: string,
