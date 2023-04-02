@@ -20,6 +20,10 @@ import { TaskId } from './task-id';
 import { TaskStatus } from './task-status';
 import { isScheduled } from './backlog-item-status';
 import { Sprint } from '../sprint/sprint';
+import { BacklogItemCategoryChanged } from './backlog-item-category-changed';
+import { BacklogItemCommitted } from './backlog-item-commited';
+import { BacklogItemTypeChanged } from './backlog-item-type-changed';
+import { BacklogItemUncommitted } from './backlog-item-uncommited';
 
 export class BacklogItem extends Entity {
   private _associatedIssueId: string;
@@ -132,7 +136,7 @@ export class BacklogItem extends Entity {
     this.category = category;
 
     DomainEventPublisher.instance().publish(
-      new BackLogItemCategoryChanged(
+      new BacklogItemCategoryChanged(
         this.tenantId,
         this.backlogItemId,
         this.category,
@@ -176,7 +180,7 @@ export class BacklogItem extends Entity {
     }
 
     if (this.isCommittedToSprint()) {
-      if (!sprint.sprintId == this.sprintId) {
+      if (sprint.sprintId == this.sprintId) {
         this.uncommitFromSprint();
       }
     }
@@ -186,7 +190,11 @@ export class BacklogItem extends Entity {
     this.sprintId = sprint.sprintId;
 
     DomainEventPublisher.instance().publish(
-      new BacklogItemCommited(this.tenantId, this.backlogItemId, this.sprintId),
+      new BacklogItemCommitted(
+        this.tenantId,
+        this.backlogItemId,
+        this.sprintId,
+      ),
     );
   }
 
