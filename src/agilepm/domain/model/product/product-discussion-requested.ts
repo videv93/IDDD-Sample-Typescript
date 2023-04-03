@@ -31,6 +31,30 @@ export class ProductDiscussionRequested implements DomainEvent {
     this._tenantId = aTenantId;
   }
 
+  get requestDiscussion() {
+    return this._requestingDiscussion;
+  }
+
+  get description() {
+    return this._description;
+  }
+
+  get name() {
+    return this._name;
+  }
+
+  get prodcutId() {
+    return this._productId;
+  }
+
+  get productOwnerId() {
+    return this._productOwnerId;
+  }
+
+  get tenantId() {
+    return this._tenantId;
+  }
+
   eventVersion() {
     return this._eventVersion;
   }
