@@ -12,8 +12,10 @@ import { TimeConstrainedProcessTrackerRepository } from 'src/common/domain/model
 import { IllegalArgumentException } from 'src/common/illegal-argument.exception';
 import { InitiateDiscussionCommand } from './initiate-discussion.command';
 import { NewProductCommand } from './new-product.command';
+import { RequestProductDiscussionCommand } from './request-product-discussion.command';
 import { RetryProductDiscussionCommand } from './retry-product-discussion.command';
 import { StartDiscussionInitiationCommand } from './start-discussion-initiation.command';
+import { TimeOutProductdiscussionRequestCommand } from './timeout-product-discussion-request.command';
 
 export class ProductApplicationService {
   private _productOwnerRepository: ProductOwnerRepository;
@@ -58,6 +60,16 @@ export class ProductApplicationService {
     );
   }
 
+  newProductWithDiscussion(command: NewProductCommand) {
+    return this.newProductWith(
+      command.tenantId,
+      command.productOwnerId,
+      command.name,
+      command.description,
+      this.requestDiscussionIfAvailable(),
+    );
+  }
+
   newProductWith(
     aTenantId: string,
     productOwnerId: string,
@@ -92,6 +104,48 @@ export class ProductApplicationService {
     );
 
     this.productRepository.save(product);
+  }
+
+  timeOutProductDiscussionRequest(
+    command: TimeOutProductdiscussionRequestCommand,
+  ) {
+    try {
+      const processId = ProcessId.existingProcessId(command.processId);
+      const tenantId = new TenantId(command.tenantId);
+
+      const product = this.productRepository.productOfDiscussionInitiationId(
+        tenantId,
+        processId.id(),
+      );
+
+      this.sendEmailForTimeOutProcess(product);
+
+      product.failDiscussionInitiation();
+      this.productRepository.save(product);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  sendEmailForTimeOutProcess(product: Product) {
+    // TODO: implement
+  }
+
+  requestProductDiscussion(command: RequestProductDiscussionCommand) {
+    const product = this.productRepository().productOfId(
+      new TenantId(command.tenantId),
+      new ProductId(command.productId),
+    );
+
+    if (product == null) {
+      throw new IllegalArgumentException(
+        'Unknown product with tenant id: ' +
+          command.tenantId +
+          ' and product id: ' +
+          command.productId,
+      );
+    }
+    this.requestProductDiscussionFor(product);
   }
 
   requestProductDiscussionFor(product: Product) {
