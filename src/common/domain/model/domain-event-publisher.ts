@@ -13,12 +13,12 @@ export class DomainEventPublisher {
   }
 
   public publish<T>(event: T): void {
-    if (!this.isPublishing() && this.hasSubscriber()) {
+    if (!this.isPublishing && this.hasSubscriber) {
       try {
-        this.setPublishing(true);
+        this.publishing = true;
         const eventType = event.constructor.name;
-        const allSubscribers: DomainEventSubscriber<T>[] = this.subscribers();
-        allSubscribers.forEach((subscriber) => {
+        const allSubscribers: DomainEventSubscriber<T>[] = this.subscribers;
+        allSubscribers.forEach(subscriber => {
           const subscribedToType = subscriber.subscribedToEventType();
           // || subscribedToType === DomainEvent.constructor.name
           if (eventType === subscribedToType) {
@@ -26,7 +26,7 @@ export class DomainEventPublisher {
           }
         });
       } finally {
-        this.setPublishing(false);
+        this.publishing = false;
       }
     }
   }
@@ -35,15 +35,15 @@ export class DomainEventPublisher {
     return this._publishing;
   }
 
-  setPublishing(flag: boolean): void {
+  set publishing(flag: boolean) {
     this._publishing = flag;
   }
 
-  hasSubscriber(): boolean {
-    return this.subscribers() != null;
+  get hasSubscriber(): boolean {
+    return this.subscribers != null;
   }
 
-  subscribers() {
+  get subscribers() {
     return this._subscribers;
   }
 }
