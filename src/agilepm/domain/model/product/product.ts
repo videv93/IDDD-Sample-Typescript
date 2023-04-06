@@ -24,7 +24,7 @@ import { ProductBacklogItemPlanned } from './product-backlog-item-planned';
 import { ProductDiscussionRequested } from './backlogitem/backlog-item-discussion-requested';
 import { Release } from './release/release';
 import { ReleaseId } from './release/release-id';
-import { ProductReleaseScheduled } from './product-release-schedulted';
+import { ProductReleaseScheduled } from './product-release-scheduled';
 
 export class Product extends Entity {
   private _backlogItems: Set<ProductBacklogItem>;

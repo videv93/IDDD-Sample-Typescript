@@ -1,6 +1,7 @@
 import { AssertionConcern } from '..';
 import { DomainEvent } from '../domain/model';
 import { IllegalArgumentException } from '../illegal-argument.exception';
+import { EventSerializer } from './event-serializer';
 
 export class StoredEvent extends AssertionConcern {
   private _eventBody: string;
@@ -25,7 +26,7 @@ export class StoredEvent extends AssertionConcern {
   }
 
   toDomainEvent<T extends DomainEvent>() {
-    let domainEventClass: T = null;
+    let domainEventClass = null;
     try {
       domainEventClass = this.typeName();
     } catch (e) {
@@ -33,7 +34,7 @@ export class StoredEvent extends AssertionConcern {
         'Class load error, because: ' + (e as Error).message,
       );
     }
-    const domainEvent: T = EventSerializer.instance().deserialize(
+    const domainEvent = EventSerializer.instance().deserialize(
       this.eventBody,
       domainEventClass,
     );

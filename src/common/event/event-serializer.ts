@@ -10,8 +10,8 @@ export class EventSerializer extends AbstractSerializer {
     return EventSerializer._eventSerializer;
   }
 
-  constructor(isCompact: boolean);
-  constructor(isCompact: boolean, isPretty?: boolean) {
+  constructor(isCompact?: boolean);
+  constructor(isCompact?: boolean, isPretty?: boolean) {
     super(isCompact, isPretty || false);
   }
 
