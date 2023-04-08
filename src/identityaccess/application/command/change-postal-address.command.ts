@@ -7,7 +7,23 @@ export class ChangePostalAddressCommand {
   private _addressPostalCode: string;
   private _addressCountryCode: string;
 
-  constructor() {}
+  constructor(
+    tenantId: string,
+    username: string,
+    addressStreetAddress: string,
+    addressCity: string,
+    addressStateProvince: string,
+    addressPostalCode: string,
+    addressCountryCode: string,
+  ) {
+    this._tenantId = tenantId;
+    this._username = username;
+    this._addressStreetAddress = addressStreetAddress;
+    this._addressCity = addressCity;
+    this._addressStateProvince = addressStateProvince;
+    this._addressPostalCode = addressPostalCode;
+    this._addressCountryCode = addressCountryCode;
+  }
 
   get tenantId() {
     return this._tenantId;

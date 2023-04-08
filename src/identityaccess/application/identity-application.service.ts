@@ -44,16 +44,16 @@ export class IdentityApplicationService {
   private _userRepository: UserRepository;
 
   activeTenant(command: ActivateTenantComand) {
-    let tenant = this.existingTenant(command.getTenantId());
+    const tenant = this.existingTenant(command.getTenantId());
     tenant.activate();
   }
 
   addGroupToGroup(command: AddGroupToGroupCommand) {
-    let parentGroup = this.existingGroup(
+    const parentGroup = this.existingGroup(
       command.getTenantId(),
       command.getParentGroupName(),
     );
-    let childGroup = this.existingGroup(
+    const childGroup = this.existingGroup(
       command.getTenantId(),
       command.getChildGroupName(),
     );
@@ -61,17 +61,20 @@ export class IdentityApplicationService {
   }
 
   addUserToGroup(command: AddUserToGroupCommand) {
-    let group = this.existingGroup(
+    const group = this.existingGroup(
       command.getTenantId(),
       command.getGroupName(),
     );
 
-    let user = this.existingUser(command.getTenantId(), command.getUsername());
+    const user = this.existingUser(
+      command.getTenantId(),
+      command.getUsername(),
+    );
     group.addUser(user);
   }
 
   authenticateUser(command: AuthenticateUserCommand) {
-    let userDescriptor = this.authenticationService().authenticate(
+    const userDescriptor = this.authenticationService().authenticate(
       new TenantId(command.getTenantId()),
       command.getUsername(),
       command.getPassword(),
@@ -81,13 +84,13 @@ export class IdentityApplicationService {
   }
 
   deactiveTenant(command: DeactivateTenantCommand) {
-    let tenant = this.existingTenant(command.tenantId);
+    const tenant = this.existingTenant(command.tenantId);
 
     tenant.deactivate();
   }
 
   changeUserContactInformation(command: ChangeContactInfoCommand) {
-    let user = this.existingUser(command.tenantId, command.username);
+    const user = this.existingUser(command.tenantId, command.username);
 
     this.internalChangeUserContactInformation(
       user,
@@ -107,7 +110,7 @@ export class IdentityApplicationService {
   }
 
   changeUserEmailAddress(command: ChangeEmailAddressCommand) {
-    let user = this.existingUser(command.tenantId, command.username);
+    const user = this.existingUser(command.tenantId, command.username);
     this.internalChangeUserContactInformation(
       user,
       user
@@ -118,7 +121,7 @@ export class IdentityApplicationService {
   }
 
   changeUserPostalAddress(command: ChangePostalAddressCommand) {
-    let user = this.existingUser(command.tenantId, command.username);
+    const user = this.existingUser(command.tenantId, command.username);
     this.internalChangeUserContactInformation(
       user,
       user
@@ -137,7 +140,7 @@ export class IdentityApplicationService {
   }
 
   changeUserPrimaryTelephone(command: ChangePrimaryTelephoneCommand) {
-    let user = this.existingUser(command.tenantId, command.username);
+    const user = this.existingUser(command.tenantId, command.username);
     this.internalChangeUserContactInformation(
       user,
       user
@@ -148,7 +151,7 @@ export class IdentityApplicationService {
   }
 
   changeUserSecondaryTelephone(command: ChangeSecondaryTelephoneCommand) {
-    let user = this.existingUser(command.tenantId, command.username);
+    const user = this.existingUser(command.tenantId, command.username);
 
     this.internalChangeUserContactInformation(
       user,
@@ -160,19 +163,19 @@ export class IdentityApplicationService {
   }
 
   changeUserPassword(command: ChangeUserPasswordCommand) {
-    let user = this.existingUser(command.tenantId, command.username);
+    const user = this.existingUser(command.tenantId, command.username);
 
     user.changePassword(command.currentPassword, command.changedPassword);
   }
 
   changeUserPersonalName(command: ChangeUserPersonalNameCommand) {
-    let user = this.existingUser(command.tenantId, command.username);
+    const user = this.existingUser(command.tenantId, command.username);
 
     user.person().changeName(new FullName(command.firstName, command.lastName));
   }
 
   definedUserEnablement(command: DefineUserEnablementCommand) {
-    let user = this.existingUser(command.tenantId, command.username);
+    const user = this.existingUser(command.tenantId, command.username);
 
     user.defineEnablement(
       new Enablement(command.isEnabled, command.startDate, command.endDate),
@@ -180,7 +183,7 @@ export class IdentityApplicationService {
   }
 
   group(tenantId: string, groupName: string) {
-    let group = this.groupRepository().groupNamed(
+    const group = this.groupRepository().groupNamed(
       new TenantId(tenantId),
       groupName,
     );
@@ -192,15 +195,15 @@ export class IdentityApplicationService {
     groupName: string,
     username: string,
   ): boolean {
-    let group = this.existingGroup(tenantId, groupName);
+    const group = this.existingGroup(tenantId, groupName);
 
-    let user = this.existingUser(tenantId, username);
+    const user = this.existingUser(tenantId, username);
     return group.isMember(user, this.groupMemberService());
   }
 
   provisionGroup(command: ProvisionGroupCommand): Group {
-    let tenant = this.existingTenant(command.tenantId);
-    let group = tenant.provisionGroup(command.groupName, command.description);
+    const tenant = this.existingTenant(command.tenantId);
+    const group = tenant.provisionGroup(command.groupName, command.description);
 
     return group;
   }
@@ -224,9 +227,9 @@ export class IdentityApplicationService {
   }
 
   registerUser(command: RegisterUserCommand): User {
-    let tenant = this.existingTenant(command.tenantId);
+    const tenant = this.existingTenant(command.tenantId);
 
-    let user = tenant.registerUser(
+    const user = tenant.registerUser(
       command.invitationIdentifier,
       command.username,
       command.password,
@@ -259,12 +262,12 @@ export class IdentityApplicationService {
   }
 
   removeGroupFromGroup(command: RemoveGroupFromGroupCommand): void {
-    let parentGroup = this.existingGroup(
+    const parentGroup = this.existingGroup(
       command.tenantId,
       command.parentGroupName,
     );
 
-    let childGroup = this.existingGroup(
+    const childGroup = this.existingGroup(
       command.tenantId,
       command.childGroupName,
     );
@@ -273,9 +276,9 @@ export class IdentityApplicationService {
   }
 
   removeUserFromGroup(command: RemoveUserFromGroupCommand): void {
-    let group = this.existingGroup(command.tenantId, command.groupName);
+    const group = this.existingGroup(command.tenantId, command.groupName);
 
-    let user = this.existingUser(command.tenantId, command.username);
+    const user = this.existingUser(command.tenantId, command.username);
 
     group.removeUser(user);
   }
@@ -292,7 +295,7 @@ export class IdentityApplicationService {
   }
 
   private existingTenant(tenantId: string) {
-    let tenant = this.tenant(tenantId);
+    const tenant = this.tenant(tenantId);
     if (tenant === null) {
       throw new IllegalArgumentException(
         'Tenant does not exist for: ' + tenantId,
@@ -302,7 +305,7 @@ export class IdentityApplicationService {
   }
 
   private existingGroup(tenantId: string, groupName: string) {
-    let group = this.group(tenantId, groupName);
+    const group = this.group(tenantId, groupName);
 
     if (group === null) {
       throw new IllegalArgumentException(
@@ -314,7 +317,7 @@ export class IdentityApplicationService {
   }
 
   private existingUser(tenantId: string, username: string) {
-    let user = this.user(tenantId, username);
+    const user = this.user(tenantId, username);
 
     if (user === null) {
       throw new IllegalArgumentException(
@@ -326,7 +329,7 @@ export class IdentityApplicationService {
   }
 
   user(tenantId: string, username: string) {
-    let user = this.userRepository().userWithUsername(
+    const user = this.userRepository().userWithUsername(
       new TenantId(tenantId),
       username,
     );
@@ -334,7 +337,7 @@ export class IdentityApplicationService {
   }
 
   tenant(tenantId: string) {
-    let tenant = this.tenantRepository().tenantOfId(new TenantId(tenantId));
+    const tenant = this.tenantRepository().tenantOfId(new TenantId(tenantId));
     return tenant;
   }
 
